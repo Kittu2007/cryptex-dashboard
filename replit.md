@@ -41,6 +41,20 @@ React 18 + Vite + Tailwind CSS custom props, GSAP 3 (ScrollTrigger), TradingView
 - `src/components/ChartPanel.tsx` — TradingView chart with indicators panel
 - `src/pages/CoinDetailView.tsx` — coin deep-view page
 
+**Mobile responsive:**
+- Breakpoints: ≤1100px (tablet), ≤768px (mobile), ≤480px (extra-small)
+- Sidebar becomes a fixed drawer (hamburger in TopRibbon), slides in with backdrop
+- Bottom nav bar (5 icons) replaces sidebar on mobile
+- All 4-col stat grids → 2-col on mobile (`.mkt-summary-grid`, `.news-stat-grid`, `.pf-stat-grid`)
+- 2-col page layouts collapse to single column on mobile (`.pf-overview-grid`, `.pf-analytics-grid`, `.news-main-grid`, `.news-article-grid`, `.profile-grid`, `.cd-main-grid`)
+- Markets table gets `overflow-x: auto` horizontal scroll on mobile
+- CoinDetailView chart height: 400px desktop → 240px mobile
+- CoinDetail right sidebar stacks below chart on mobile
+- TopRibbon: shows only currency symbol + hamburger + price on mobile; hides theme toggle + wallet on very small screens
+- Settings section hints hidden on mobile; SettingRow wraps label above control on ≤480px
+- `.page-wrap` class reduces padding on mobile (24px→14px, →10px on xs)
+- CSS classes used for all overrides (with `!important`) so inline styles in JSX don't conflict
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck (pre-existing TS errors in ChartPanel.tsx only)

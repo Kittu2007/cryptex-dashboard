@@ -118,16 +118,17 @@ function SettingRow({ label, desc, control, last }: {
   label: string; desc: string; control: React.ReactNode; last?: boolean;
 }) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "14px 18px",
-      borderBottom: last ? "none" : "1px solid rgba(31,31,46,0.5)",
-      transition: "background 0.1s"
-    }}
+    <div className="setting-row"
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 18px", gap: 12, flexWrap: "wrap",
+        borderBottom: last ? "none" : "1px solid rgba(31,31,46,0.5)",
+        transition: "background 0.1s"
+      }}
       onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
       onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
     >
-      <div>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, color: "var(--text-1)", marginBottom: 2 }}>{label}</div>
         <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-3)" }}>{desc}</div>
       </div>

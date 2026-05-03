@@ -309,7 +309,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 24, marginLeft: 8, flexWrap: "wrap" }}>
+        <div className="cd-header-stats" style={{ display: "flex", gap: 24, marginLeft: 8, flexWrap: "wrap" }}>
           {[
             { label: "24H HIGH", value: formatPrice(h24),  color: "var(--bull)"   },
             { label: "24H LOW",  value: formatPrice(l24),  color: "var(--bear)"   },
