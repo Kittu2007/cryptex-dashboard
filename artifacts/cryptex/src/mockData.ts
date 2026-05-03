@@ -1,11 +1,11 @@
 export const coins = [
-  { id: "btc",  name: "Bitcoin",  symbol: "BTC",  price: 67432.50, change24h: 2.4,  change7d: 8.1,  volume: "38.2B", marketCap: "1.32T", signal: "Bullish" as const, avatar: "#A78BFA" },
+  { id: "btc",  name: "Bitcoin",  symbol: "BTC",  price: 67432.50, change24h: 2.4,  change7d: 8.1,  volume: "38.2B", marketCap: "1.32T", signal: "Bullish" as const, avatar: "#3B82F6" },
   { id: "eth",  name: "Ethereum", symbol: "ETH",  price: 3891.20,  change24h: 1.8,  change7d: -2.3, volume: "18.4B", marketCap: "468B",  signal: "Neutral" as const, avatar: "#6B7280" },
-  { id: "sol",  name: "Solana",   symbol: "SOL",  price: 182.40,   change24h: -0.6, change7d: 12.4, volume: "4.2B",  marketCap: "82B",   signal: "Bullish" as const, avatar: "#34D399" },
+  { id: "sol",  name: "Solana",   symbol: "SOL",  price: 182.40,   change24h: -0.6, change7d: 12.4, volume: "4.2B",  marketCap: "82B",   signal: "Bullish" as const, avatar: "#22C55E" },
   { id: "bnb",  name: "BNB",      symbol: "BNB",  price: 601.20,   change24h: 3.1,  change7d: 5.6,  volume: "2.8B",  marketCap: "91B",   signal: "Bullish" as const, avatar: "#EAB308" },
-  { id: "matic",name: "Polygon",  symbol: "MATIC",price: 0.892,    change24h: -1.2, change7d: -4.8, volume: "0.8B",  marketCap: "8.9B",  signal: "Bearish" as const, avatar: "#8B5CF6" },
+  { id: "matic",name: "Polygon",  symbol: "MATIC",price: 0.892,    change24h: -1.2, change7d: -4.8, volume: "0.8B",  marketCap: "8.9B",  signal: "Bearish" as const, avatar: "#F97316" },
   { id: "ada",  name: "Cardano",  symbol: "ADA",  price: 0.612,    change24h: 0.4,  change7d: 2.1,  volume: "0.5B",  marketCap: "21.4B", signal: "Neutral" as const, avatar: "#6B7280" },
-  { id: "dot",  name: "Polkadot", symbol: "DOT",  price: 9.82,     change24h: -2.1, change7d: -6.3, volume: "0.4B",  marketCap: "14.2B", signal: "Bearish" as const, avatar: "#F87171" },
+  { id: "dot",  name: "Polkadot", symbol: "DOT",  price: 9.82,     change24h: -2.1, change7d: -6.3, volume: "0.4B",  marketCap: "14.2B", signal: "Bearish" as const, avatar: "#EF4444" },
   { id: "link", name: "Chainlink",symbol: "LINK", price: 18.40,    change24h: 4.2,  change7d: 11.8, volume: "0.9B",  marketCap: "11.8B", signal: "Bullish" as const, avatar: "#60A5FA" },
 ];
 
@@ -14,9 +14,9 @@ export const portfolio = {
   totalGain: 11820,
   totalGainPct: 38.2,
   holdings: [
-    { symbol: "BTC",   name: "Bitcoin",  allocation: 48, value: 20554, gain: 8200,  gainPct: 66.4,  color: "#A78BFA" },
+    { symbol: "BTC",   name: "Bitcoin",  allocation: 48, value: 20554, gain: 8200,  gainPct: 66.4,  color: "#3B82F6" },
     { symbol: "ETH",   name: "Ethereum", allocation: 30, value: 12846, gain: 4100,  gainPct: 46.9,  color: "#6B7280" },
-    { symbol: "SOL",   name: "Solana",   allocation: 14, value: 5995,  gain: -800,  gainPct: -11.8, color: "#34D399" },
+    { symbol: "SOL",   name: "Solana",   allocation: 14, value: 5995,  gain: -800,  gainPct: -11.8, color: "#22C55E" },
     { symbol: "Other", name: "Other",    allocation: 8,  value: 3425,  gain: 320,   gainPct: 10.3,  color: "#38364A" },
   ]
 };
@@ -347,7 +347,7 @@ export function macdSeries(candles: C[], fast = 12, slow = 26, sig = 9) {
     if (i > sig - 1) sigEma = line[i].value * ksig + sigEma * (1 - ksig);
     const h = line[i].value - sigEma;
     signalLine.push({ time: line[i].time, value: parseFloat(sigEma.toFixed(4)) });
-    hist.push({ time: line[i].time, value: parseFloat(h.toFixed(4)), color: h >= 0 ? "rgba(52,211,153,0.75)" : "rgba(248,113,113,0.75)" });
+    hist.push({ time: line[i].time, value: parseFloat(h.toFixed(4)), color: h >= 0 ? "rgba(34,197,94,0.75)" : "rgba(239,68,68,0.75)" });
   }
   return { line, signalLine, hist };
 }

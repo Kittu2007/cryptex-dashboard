@@ -127,7 +127,7 @@ function TransactionsCol() {
             fontFamily: "var(--font-ui)", fontSize: 9,
             color: filter === f ? (f === "BUY" ? "var(--bull)" : f === "SELL" ? "var(--bear)" : "var(--accent)") : "var(--text-3)",
             background: filter === f ? (f === "BUY" ? "var(--bull-bg)" : f === "SELL" ? "var(--bear-bg)" : "var(--accent-dim)") : "none",
-            border: `1px solid ${filter === f ? (f === "BUY" ? "rgba(52,211,153,0.4)" : f === "SELL" ? "rgba(248,113,113,0.4)" : "var(--accent)") : "var(--border)"}`,
+            border: `1px solid ${filter === f ? (f === "BUY" ? "rgba(34,197,94,0.4)" : f === "SELL" ? "rgba(239,68,68,0.4)" : "var(--accent)") : "var(--border)"}`,
             borderRadius: 3, padding: "2px 8px", cursor: "pointer", transition: "all 0.15s",
             display: "flex", alignItems: "center", gap: 4,
           }}>
@@ -165,7 +165,7 @@ function TransactionsCol() {
                 {isFailed ? "FAILED" : tx.type}
               </span>
 
-              <CoinIcon symbol={tx.symbol} size={22} fallbackColor="#A78BFA" />
+              <CoinIcon symbol={tx.symbol} size={22} fallbackColor="#3B82F6" />
 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -248,7 +248,7 @@ function WatchlistCol() {
       if (!el) continue;
       const up = lp.price >= lp.prevPrice;
       gsap.to(el, {
-        color: up ? "#34D399" : "#F87171", duration: 0.08,
+        color: up ? "#22C55E" : "#EF4444", duration: 0.08,
         onComplete: () => gsap.to(el, { color: "var(--text-1)", duration: 1 }),
       });
     }
@@ -285,7 +285,7 @@ function WatchlistCol() {
               borderBottom: i < watchlist.length - 1 ? "1px solid rgba(31,31,46,0.5)" : "none",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
-                <CoinIcon symbol={coin.symbol} size={26} fallbackColor="#A78BFA" />
+                <CoinIcon symbol={coin.symbol} size={26} fallbackColor="#3B82F6" />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)", fontWeight: 600 }}>{coin.name}</div>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{coin.symbol}</div>
@@ -337,7 +337,7 @@ function WatchlistCol() {
             borderBottom: i < trending.length - 1 ? "1px solid rgba(31,31,46,0.3)" : "none",
           }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <CoinIcon symbol={t.symbol} size={14} fallbackColor="#A78BFA" />
+              <CoinIcon symbol={t.symbol} size={14} fallbackColor="#3B82F6" />
               <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", fontWeight: 600 }}>{t.symbol}</span>
               <span style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-3)" }}>{t.name}</span>
             </div>

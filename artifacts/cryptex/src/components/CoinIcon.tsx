@@ -10,7 +10,7 @@ interface CoinIconProps {
   fallbackColor?: string;
 }
 
-export default function CoinIcon({ symbol, size = 28, fallbackColor = "#A78BFA" }: CoinIconProps) {
+export default function CoinIcon({ symbol, size = 28, fallbackColor = "#3B82F6" }: CoinIconProps) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {

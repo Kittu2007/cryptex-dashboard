@@ -317,11 +317,11 @@ export default function SettingsView() {
         </div>
         <button onClick={handleReset} style={{
           fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
-          background: "var(--bear-bg)", border: "1px solid rgba(248,113,113,0.3)",
+          background: "var(--bear-bg)", border: "1px solid rgba(239,68,68,0.3)",
           borderRadius: 5, padding: "6px 14px", cursor: "pointer", transition: "all 0.15s"
         }}
           onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--bear)")}
-          onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)")}
+          onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)")}
         >
           Reset All
         </button>

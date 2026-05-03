@@ -74,7 +74,7 @@ export default function MarketsView() {
         if (el) {
           const isUp = lp.price > prev;
           gsap.fromTo(el,
-            { backgroundColor: isUp ? "rgba(52,211,153,0.07)" : "rgba(248,113,113,0.07)" },
+            { backgroundColor: isUp ? "rgba(34,197,94,0.07)" : "rgba(239,68,68,0.07)" },
             { backgroundColor: "transparent", duration: 1.0, ease: "power2.out" }
           );
         }
@@ -191,13 +191,13 @@ export default function MarketsView() {
         }}>
           <span className="section-label" style={{ flexShrink: 0 }}>DOMINANCE</span>
           <div style={{ flex: 1, height: 6, borderRadius: 3, overflow: "hidden", display: "flex", gap: 1 }}>
-            <div style={{ width: `${btcDom}%`, height: "100%", background: "#A78BFA", transition: "width 0.5s" }} />
+            <div style={{ width: `${btcDom}%`, height: "100%", background: "#3B82F6", transition: "width 0.5s" }} />
             <div style={{ width: `${ethDom.toFixed(1)}%`, height: "100%", background: "#6B7280", transition: "width 0.5s" }} />
             <div style={{ flex: 1, height: "100%", background: "var(--bg-raised)" }} />
           </div>
           <div style={{ display: "flex", gap: 16, flexShrink: 0 }}>
             {[
-              { label: "BTC", pct: btcDom.toFixed(1),       color: "#A78BFA" },
+              { label: "BTC", pct: btcDom.toFixed(1),       color: "#3B82F6" },
               { label: "ETH", pct: ethDom.toFixed(1),        color: "#6B7280" },
               { label: "Others", pct: otherDom.toFixed(1),   color: "var(--text-3)" },
             ].map((d, i) => (

@@ -99,13 +99,13 @@ export default function NewsView() {
           <span className="section-label" style={{ flexShrink: 0 }}>MARKET SENTIMENT</span>
           <div style={{ flex: 1, height: 6, background: "var(--bg-raised)", borderRadius: 3, overflow: "hidden", display: "flex", gap: 1 }}>
             <div style={{ width: `${bullCount / total * 100}%`, height: "100%", background: "var(--bull)", transition: "width 0.4s" }} />
-            <div style={{ width: `${neutCount / total * 100}%`, height: "100%", background: "#A78BFA", transition: "width 0.4s" }} />
+            <div style={{ width: `${neutCount / total * 100}%`, height: "100%", background: "#3B82F6", transition: "width 0.4s" }} />
             <div style={{ flex: 1, height: "100%", background: "var(--bear)", transition: "width 0.4s" }} />
           </div>
           <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
             {[
               { label: "BULLISH", val: `${Math.round(bullCount / total * 100)}%`, color: "var(--bull)" },
-              { label: "NEUTRAL", val: `${Math.round(neutCount / total * 100)}%`, color: "#A78BFA"      },
+              { label: "NEUTRAL", val: `${Math.round(neutCount / total * 100)}%`, color: "#3B82F6"      },
               { label: "BEARISH", val: `${Math.round(bearCount / total * 100)}%`, color: "var(--bear)"  },
               { label: "AVG SCORE",  val: `${avgSent}`,                            color: sentimentColor(avgSent) },
             ].map((s, i) => (

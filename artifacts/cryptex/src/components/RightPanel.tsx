@@ -18,8 +18,8 @@ const OTHER_COST = OTHER_VAL / 1.103;
 const HOLD_COLORS = {
   BTC:   "#F59E0B",   // amber/gold
   ETH:   "#60A5FA",   // electric blue
-  SOL:   "#34D399",   // emerald
-  Other: "#A78BFA",   // violet/purple
+  SOL:   "#22C55E",   // emerald
+  Other: "#3B82F6",   // violet/purple
 };
 
 // ── AnimatedNumber ─────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSiz
 
     // Flash the span's own color then roll back to text-1
     gsap.fromTo(elRef.current,
-      { color: isUp ? "#34D399" : "#F87171" },
+      { color: isUp ? "#22C55E" : "#EF4444" },
       { color: "var(--text-1)", duration: 0.9, ease: "power2.out" }
     );
     // Count up / down to new value
@@ -117,7 +117,7 @@ function FearGreedGauge({ value }: { value: number }) {
           {value}
         </span>
         <div style={{ flex: 1, position: "relative", height: 4 }}>
-          <div style={{ height: 4, borderRadius: 2, background: "linear-gradient(to right, #F87171, #EAB308, #34D399)" }} />
+          <div style={{ height: 4, borderRadius: 2, background: "linear-gradient(to right, #EF4444, #EAB308, #22C55E)" }} />
           <div ref={dotRef} style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--text-1)", border: "1.5px solid var(--bg-surface)", boxShadow: `0 0 6px ${labelColor}80`, position: "absolute", top: -2, left: `calc(${value}% - 4px)` }} />
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function RightPanel() {
       onUpdate: () => { if (portRef.current) portRef.current.textContent = formatPrice(obj.v); },
     });
     gsap.fromTo(portRef.current,
-      { color: totalVal > prev ? "#34D399" : "#F87171" },
+      { color: totalVal > prev ? "#22C55E" : "#EF4444" },
       { color: "var(--text-1)", duration: 1, ease: "power2.out" }
     );
   }, [totalVal]);

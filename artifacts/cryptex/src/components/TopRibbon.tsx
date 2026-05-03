@@ -64,7 +64,7 @@ export default function TopRibbon() {
     const up = price > prevPrice.current;
     prevPrice.current = price;
     gsap.fromTo(priceRef.current,
-      { color: up ? "#34D399" : "#F87171" },
+      { color: up ? "#22C55E" : "#EF4444" },
       { color: "var(--text-1)", duration: 0.8, ease: "power2.out" }
     );
   }, [price]);
@@ -228,12 +228,12 @@ export default function TopRibbon() {
             fontFamily: "var(--font-data)", fontSize: 10, fontWeight: 600,
             color: "var(--accent)",
             background: "var(--accent-dim)",
-            border: "1px solid rgba(139,92,246,0.3)",
+            border: "1px solid rgba(59,130,246,0.3)",
             borderRadius: 5, padding: "4px 9px", cursor: "pointer",
             transition: "all 0.15s", whiteSpace: "nowrap",
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,0.18)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-dim)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)"; }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.18)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-dim)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)"; }}
         >
           <span style={{ fontSize: 11 }}>{CURRENCY_SYMBOLS[settings.currency]}</span>
           {settings.currency}
@@ -273,7 +273,7 @@ export default function TopRibbon() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--bull)",
-              background: "var(--bull-bg)", border: "1px solid rgba(52,211,153,0.35)",
+              background: "var(--bull-bg)", border: "1px solid rgba(34,197,94,0.35)",
               borderRadius: 4, padding: "5px 10px", cursor: "pointer",
             }}
           >

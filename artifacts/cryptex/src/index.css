@@ -1,52 +1,88 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --bg-void:     #0D0D10;
-  --bg-surface:  #13131A;
-  --bg-raised:   #1A1A24;
-  --bg-hover:    #1F1F2C;
-  --border:      #1F1F2E;
-  --border-2:    #2A2A40;
-  --text-1:      #E8E6F0;
-  --text-2:      #6B6882;
-  --text-3:      #38364A;
-  --accent:      #A78BFA;
-  --accent-dim:  rgba(167,139,250,0.1);
-  --bull:        #34D399;
-  --bear:        #F87171;
-  --bull-bg:     rgba(52,211,153,0.08);
-  --bear-bg:     rgba(248,113,113,0.08);
-  --chart-bg:    #0A0A0E;
-  --chart-grid:  #13131A;
-  --chart-line:  #A78BFA;
-  --chart-area:  rgba(167,139,250,0.06);
+  /* Backgrounds */
+  --bg-void:     #0B1220;
+  --bg-surface:  #111827;
+  --bg-raised:   #1F2937;
+  --bg-hover:    #263248;
+
+  /* Borders */
+  --border:      #374151;
+  --border-2:    #4B5563;
+
+  /* Text */
+  --text-1:      #E5E7EB;
+  --text-2:      #9CA3AF;
+  --text-3:      #6B7280;
+
+  /* Primary — Blue */
+  --accent:      #3B82F6;
+  --accent-hover:#2563EB;
+  --accent-dim:  rgba(59,130,246,0.12);
+
+  /* Secondary — Teal */
+  --secondary:     #14B8A6;
+  --secondary-dim: rgba(20,184,166,0.12);
+
+  /* Status */
+  --bull:        #22C55E;
+  --bear:        #EF4444;
+  --warning:     #F59E0B;
+  --info:        #38BDF8;
+  --bull-bg:     rgba(34,197,94,0.10);
+  --bear-bg:     rgba(239,68,68,0.10);
+
+  /* Chart */
+  --chart-bg:    #0B1220;
+  --chart-grid:  #1F2937;
+  --chart-line:  #3B82F6;
+  --chart-line2: #14B8A6;
+  --chart-line3: #F59E0B;
+  --chart-line4: #EF4444;
+  --chart-area:  rgba(59,130,246,0.08);
+
+  /* Typography */
   --font-display: 'Sora', sans-serif;
-  --font-ui:     'Inter', sans-serif;
-  --font-data:   'JetBrains Mono', monospace;
+  --font-ui:      'Inter', sans-serif;
+  --font-data:    'JetBrains Mono', monospace;
   --base-font-size: 13px;
 }
 
-/* Light theme overrides */
+/* ── Light theme overrides ─────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg-void:     #F0F0F5;
+  --bg-void:     #F6F8FA;
   --bg-surface:  #FFFFFF;
-  --bg-raised:   #F5F5FA;
-  --bg-hover:    #EDEDF5;
-  --border:      #E0DFF0;
-  --border-2:    #C8C6E0;
-  --text-1:      #1A1828;
-  --text-2:      #6B6882;
-  --text-3:      #A09CB8;
-  --chart-bg:    #F8F8FC;
-  --chart-grid:  #EDEDF5;
+  --bg-raised:   #F1F3F5;
+  --bg-hover:    #E8EBF0;
+  --border:      #E1E4E8;
+  --border-2:    #C8CDD6;
+  --text-1:      #0B1220;
+  --text-2:      #4B5563;
+  --text-3:      #6B7280;
+  --accent:      #2563EB;
+  --accent-hover:#1D4ED8;
+  --accent-dim:  rgba(37,99,235,0.1);
+  --secondary:   #0D9488;
+  --secondary-dim: rgba(13,148,136,0.1);
+  --bull:        #16A34A;
+  --bear:        #DC2626;
+  --bull-bg:     rgba(22,163,74,0.1);
+  --bear-bg:     rgba(220,38,38,0.1);
+  --chart-bg:    #F6F8FA;
+  --chart-grid:  #E1E4E8;
+  --chart-line:  #2563EB;
 }
 
-/* Compact mode */
+/* ── Compact mode ──────────────────────────────────────────────────────────── */
 [data-compact="true"] .chart-area { height: 200px !important; }
 [data-compact="true"] .top-ribbon { height: 34px !important; }
-[data-compact="true"] td, [data-compact="true"] th { padding-top: 6px !important; padding-bottom: 6px !important; }
+[data-compact="true"] td,
+[data-compact="true"] th { padding-top: 6px !important; padding-bottom: 6px !important; }
 
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -61,16 +97,16 @@ body {
 }
 
 .font-display { font-family: var(--font-display); }
-.font-ui { font-family: var(--font-ui); }
-.font-data { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.font-ui      { font-family: var(--font-ui); }
+.font-data    { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-void); }
 ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
-/* Ticker tape */
+/* ── Ticker tape ───────────────────────────────────────────────────────────── */
 .ticker-wrapper { overflow: hidden; }
 .ticker-track {
   display: flex;
@@ -79,13 +115,13 @@ body {
 }
 .ticker-track:hover { animation-play-state: paused; }
 @keyframes marquee {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-/* Skeleton shimmer */
+/* ── Skeleton shimmer ──────────────────────────────────────────────────────── */
 @keyframes shimmer {
-  0% { background-position: -600px 0; }
+  0%   { background-position: -600px 0; }
   100% { background-position: 600px 0; }
 }
 .skeleton {
@@ -95,10 +131,10 @@ body {
   border-radius: 4px;
 }
 
-/* Live pulse */
+/* ── Live pulse ────────────────────────────────────────────────────────────── */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.4); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
 }
 .live-dot {
   width: 6px; height: 6px;
@@ -107,10 +143,10 @@ body {
   animation: pulse-dot 1.8s ease-in-out infinite;
 }
 
-/* Pending pulse */
+/* ── Pending pulse ─────────────────────────────────────────────────────────── */
 @keyframes pulse-pending {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50%       { opacity: 0.3; }
 }
 .pending-dot {
   width: 5px; height: 5px;
@@ -119,7 +155,7 @@ body {
   animation: pulse-pending 1.5s ease-in-out infinite;
 }
 
-/* Layout */
+/* ── Layout ────────────────────────────────────────────────────────────────── */
 .sidebar {
   position: fixed; left: 0; top: 0; height: 100vh;
   width: 64px; z-index: 40;
@@ -144,65 +180,65 @@ body {
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Nav icon active state */
+/* ── Nav active indicator ──────────────────────────────────────────────────── */
 .nav-item { position: relative; overflow: visible; }
 .nav-item.active::before {
   content: '';
   position: absolute;
   left: 0; top: 50%; transform: translateY(-50%);
-  width: 2.5px; height: 22px;
+  width: 3px; height: 22px;
   background: var(--accent);
   border-radius: 0 2px 2px 0;
-  box-shadow: 0 0 8px rgba(167,139,250,0.5);
+  box-shadow: 0 0 10px rgba(59,130,246,0.55);
 }
 
-/* Tooltip animation */
+/* ── Tooltip animation ─────────────────────────────────────────────────────── */
 @keyframes tooltipIn {
   from { opacity: 0; transform: translateY(-50%) translateX(-6px); }
   to   { opacity: 1; transform: translateY(-50%) translateX(0); }
 }
 
-/* Chart container */
+/* ── Chart container ───────────────────────────────────────────────────────── */
 .chart-container { position: relative; }
 .chart-area { transition: height 0.3s ease; }
 
-/* Table */
+/* ── Table ─────────────────────────────────────────────────────────────────── */
 .market-table th,
 .market-table td { font-variant-numeric: tabular-nums; }
 
-/* Hover row */
+/* ── Hover row ─────────────────────────────────────────────────────────────── */
 .market-row { transition: background 0.15s ease; cursor: pointer; }
 .market-row:hover { background: var(--bg-hover); }
 
-/* Donut chart */
+/* ── Donut chart ───────────────────────────────────────────────────────────── */
 .donut-ring {
   transform: rotate(-90deg);
   transform-origin: 60px 60px;
 }
 
-/* Transition defaults */
+/* ── Transitions ───────────────────────────────────────────────────────────── */
 button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   transition: all 0.15s ease;
 }
 
-/* Vertical divider */
+/* ── Vertical divider ──────────────────────────────────────────────────────── */
 .v-divider {
   width: 1px; height: 24px;
   background: var(--border);
   flex-shrink: 0;
 }
 
-/* Section label */
+/* ── Section label ─────────────────────────────────────────────────────────── */
 .section-label {
   font-family: var(--font-ui);
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #7B78A0;
+  color: var(--text-3);
 }
 
-/* Sentiment bar */
+/* ── Sentiment bar ─────────────────────────────────────────────────────────── */
 .sentiment-bar-bg {
   height: 1px;
   background: var(--border);
@@ -216,10 +252,36 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   left: 0; top: 0;
 }
 
-/* Sparkline */
+/* ── Sparkline ─────────────────────────────────────────────────────────────── */
 .sparkline { display: inline-block; vertical-align: middle; }
 
-/* Mobile */
+/* ── Pill / badge helpers ──────────────────────────────────────────────────── */
+.pill-bull {
+  color: var(--bull);
+  background: var(--bull-bg);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+.pill-bear {
+  color: var(--bear);
+  background: var(--bear-bg);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+.pill-accent {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+/* ── Mobile ────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .main-content { margin-left: 0; padding-bottom: 60px; }
@@ -230,11 +292,11 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
     display: flex; align-items: center; justify-content: space-around;
     z-index: 50;
   }
-  .hero-row { flex-direction: column !important; }
-  .right-panel { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border) !important; }
-  .bottom-three { flex-direction: column !important; }
-  .bottom-col { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-  .ribbon-mid { display: none !important; }
+  .hero-row         { flex-direction: column !important; }
+  .right-panel      { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border) !important; }
+  .bottom-three     { flex-direction: column !important; }
+  .bottom-col       { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+  .ribbon-mid       { display: none !important; }
 }
 
 @media (min-width: 769px) {

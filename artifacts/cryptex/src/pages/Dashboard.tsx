@@ -73,7 +73,7 @@ export default function Dashboard() {
       const el = document.querySelector(".ribbon-live-price") as HTMLElement;
       if (el) {
         gsap.to(el, {
-          color: delta > 0 ? "#34D399" : "#F87171", duration: 0.1,
+          color: delta > 0 ? "#22C55E" : "#EF4444", duration: 0.1,
           onComplete: () => gsap.to(el, { color: "var(--text-1)", duration: 0.8 }),
         });
       }

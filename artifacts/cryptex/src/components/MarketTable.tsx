@@ -76,7 +76,7 @@ export default function MarketTable() {
       if (!el) continue;
       const up = lp.price >= lp.prevPrice;
       gsap.to(el, {
-        color: up ? "#34D399" : "#F87171", duration: 0.08,
+        color: up ? "#22C55E" : "#EF4444", duration: 0.08,
         onComplete: () => gsap.to(el, { color: "var(--text-1)", duration: 1.2 })
       });
     }

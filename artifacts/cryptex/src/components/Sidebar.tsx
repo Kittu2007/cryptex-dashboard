@@ -70,7 +70,7 @@ function NavButton({ icon: Icon, label, id, active, onNav }: NavButtonProps) {
         style={{
           width: "100%", height: 44,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: isActive ? "rgba(139,92,246,0.1)" : "none",
+          background: isActive ? "rgba(59,130,246,0.1)" : "none",
           border: "none", cursor: "pointer",
           color: isActive ? "var(--accent)" : "var(--text-3)",
           transition: "color 0.18s, background 0.18s",
@@ -136,8 +136,8 @@ export default function Sidebar({ active, onNav }: SidebarProps) {
     if (!logoRef.current) return;
     gsap.to(logoRef.current, {
       boxShadow: enter
-        ? "0 0 18px rgba(139,92,246,0.45)"
-        : "0 0 10px rgba(139,92,246,0.2)",
+        ? "0 0 18px rgba(59,130,246,0.45)"
+        : "0 0 10px rgba(59,130,246,0.2)",
       duration: 0.25,
     });
   };
@@ -160,14 +160,14 @@ export default function Sidebar({ active, onNav }: SidebarProps) {
           onMouseLeave={() => handleLogoHover(false)}
           style={{
             width: 34, height: 34,
-            background: "linear-gradient(135deg, rgba(139,92,246,0.22), rgba(139,92,246,0.05))",
+            background: "linear-gradient(135deg, rgba(59,130,246,0.22), rgba(59,130,246,0.05))",
             border: "1.5px solid var(--accent)",
             borderRadius: 8,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "var(--font-display)",
             fontSize: 17, fontWeight: 800,
             color: "var(--accent)",
-            boxShadow: "0 0 10px rgba(139,92,246,0.2)",
+            boxShadow: "0 0 10px rgba(59,130,246,0.2)",
             transition: "border-color 0.2s",
           }}
         >C</div>

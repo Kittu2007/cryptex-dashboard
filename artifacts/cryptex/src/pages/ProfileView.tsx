@@ -186,11 +186,11 @@ export default function ProfileView() {
             <button style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
               fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
-              background: "var(--bear-bg)", border: "1px solid rgba(248,113,113,0.3)",
+              background: "var(--bear-bg)", border: "1px solid rgba(239,68,68,0.3)",
               borderRadius: 6, padding: "8px", cursor: "pointer", transition: "border-color 0.15s"
             }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--bear)")}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)")}
             >
               <LogOut size={12} /> Sign Out
             </button>
@@ -282,7 +282,7 @@ export default function ProfileView() {
                         fontFamily: "var(--font-ui)", fontSize: 11,
                         color: api.status === "connected" ? "var(--bear)" : "var(--accent)",
                         background: api.status === "connected" ? "var(--bear-bg)" : "var(--accent-dim)",
-                        border: `1px solid ${api.status === "connected" ? "rgba(248,113,113,0.3)" : "var(--accent)"}`,
+                        border: `1px solid ${api.status === "connected" ? "rgba(239,68,68,0.3)" : "var(--accent)"}`,
                         borderRadius: 5, padding: "5px 12px", cursor: "pointer", transition: "all 0.15s"
                       }}>
                         <Link2 size={11} />
@@ -342,11 +342,11 @@ export default function ProfileView() {
                   {!s.current && (
                     <button onClick={() => revokeSession(i)} style={{
                       fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
-                      background: "none", border: "1px solid rgba(248,113,113,0.3)",
+                      background: "none", border: "1px solid rgba(239,68,68,0.3)",
                       borderRadius: 4, padding: "4px 10px", cursor: "pointer", transition: "border-color 0.15s"
                     }}
                       onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--bear)")}
-                      onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)")}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)")}
                     >Revoke</button>
                   )}
                 </div>
@@ -359,7 +359,7 @@ export default function ProfileView() {
               <div style={{ padding: "13px 18px", borderTop: "1px solid var(--border)" }}>
                 <button onClick={() => setRevokedSessions(new Set(sessions.map((_, i) => i).filter(i => !sessions[i].current)))} style={{
                   fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
-                  background: "var(--bear-bg)", border: "1px solid rgba(248,113,113,0.3)",
+                  background: "var(--bear-bg)", border: "1px solid rgba(239,68,68,0.3)",
                   borderRadius: 5, padding: "7px 16px", cursor: "pointer"
                 }}>Revoke All Other Sessions</button>
               </div>
@@ -397,7 +397,7 @@ export default function ProfileView() {
                   }}>Update Payment</button>
                   <button style={{
                     fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
-                    background: "none", border: "1px solid rgba(248,113,113,0.2)",
+                    background: "none", border: "1px solid rgba(239,68,68,0.2)",
                     borderRadius: 5, padding: "7px 14px", cursor: "pointer"
                   }}>Cancel Plan</button>
                 </div>

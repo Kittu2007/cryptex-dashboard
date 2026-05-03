@@ -30,11 +30,11 @@ const INDICATORS: IndicatorDef[] = [
     params: [{ key: "period", label: "Period", min: 2, max: 500, step: 1,   default: 20  }] },
   { id: "sma50",  label: "SMA",            cat: "Overlay",    color: "#60A5FA",
     params: [{ key: "period", label: "Period", min: 2, max: 500, step: 1,   default: 50  }] },
-  { id: "sma200", label: "SMA",            cat: "Overlay",    color: "#F87171",
+  { id: "sma200", label: "SMA",            cat: "Overlay",    color: "#EF4444",
     params: [{ key: "period", label: "Period", min: 2, max: 500, step: 1,   default: 200 }] },
-  { id: "ema9",   label: "EMA",            cat: "Overlay",    color: "#34D399",
+  { id: "ema9",   label: "EMA",            cat: "Overlay",    color: "#22C55E",
     params: [{ key: "period", label: "Period", min: 2, max: 500, step: 1,   default: 9   }] },
-  { id: "ema21",  label: "EMA",            cat: "Overlay",    color: "#A78BFA",
+  { id: "ema21",  label: "EMA",            cat: "Overlay",    color: "#3B82F6",
     params: [{ key: "period", label: "Period", min: 2, max: 500, step: 1,   default: 21  }] },
   { id: "bb",     label: "Bollinger Bands",cat: "Overlay",    color: "#818CF8",
     params: [
@@ -42,9 +42,9 @@ const INDICATORS: IndicatorDef[] = [
       { key: "mult",   label: "Std Dev", min: 0.5, max: 5,   step: 0.5, default: 2  },
     ] },
   { id: "vwap",   label: "VWAP",           cat: "Overlay",    color: "#F59E0B", params: [] },
-  { id: "rsi",    label: "RSI",            cat: "Oscillator", color: "#A78BFA",
+  { id: "rsi",    label: "RSI",            cat: "Oscillator", color: "#3B82F6",
     params: [{ key: "period", label: "Period", min: 2, max: 50, step: 1,   default: 14  }] },
-  { id: "macd",   label: "MACD",           cat: "Oscillator", color: "#34D399",
+  { id: "macd",   label: "MACD",           cat: "Oscillator", color: "#22C55E",
     params: [
       { key: "fast",   label: "Fast",   min: 2,  max: 50,  step: 1, default: 12 },
       { key: "slow",   label: "Slow",   min: 5,  max: 100, step: 1, default: 26 },
@@ -233,27 +233,27 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
     // Price series
     if (activeChartType === "Candlestick") {
       const s = chart.addSeries(CandlestickSeries, {
-        upColor: "#34D399", downColor: "#F87171",
-        borderUpColor: "#34D399", borderDownColor: "#F87171",
-        wickUpColor: "#34D399", wickDownColor: "#F87171",
+        upColor: "#22C55E", downColor: "#EF4444",
+        borderUpColor: "#22C55E", borderDownColor: "#EF4444",
+        wickUpColor: "#22C55E", wickDownColor: "#EF4444",
       });
       s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
       priceSeriesRef.current = s;
       lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else if (activeChartType === "Bar") {
-      const s = chart.addSeries(BarSeries, { upColor: "#34D399", downColor: "#F87171" });
+      const s = chart.addSeries(BarSeries, { upColor: "#22C55E", downColor: "#EF4444" });
       s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
       priceSeriesRef.current = s;
       lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else if (activeChartType === "Line") {
-      const s = chart.addSeries(LineSeries, { color: "#A78BFA", lineWidth: 2 });
+      const s = chart.addSeries(LineSeries, { color: "#3B82F6", lineWidth: 2 });
       s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
       priceSeriesRef.current = s;
       lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else {
       const s = chart.addSeries(AreaSeries, {
-        lineColor: "#A78BFA", lineWidth: 2,
-        topColor: "rgba(167,139,250,0.22)", bottomColor: "rgba(167,139,250,0.01)",
+        lineColor: "#3B82F6", lineWidth: 2,
+        topColor: "rgba(59,130,246,0.22)", bottomColor: "rgba(59,130,246,0.01)",
       });
       s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
       priceSeriesRef.current = s;
@@ -261,11 +261,11 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
     }
 
     // Volume histogram
-    const vol = chart.addSeries(HistogramSeries, { color: "rgba(52,211,153,0.3)", priceFormat: { type: "volume" }, priceScaleId: "vol" });
+    const vol = chart.addSeries(HistogramSeries, { color: "rgba(34,197,94,0.3)", priceFormat: { type: "volume" }, priceScaleId: "vol" });
     chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
     vol.setData(candles.map(c => ({
       time: c.time as any, value: c.value,
-      color: c.close >= c.open ? "rgba(52,211,153,0.28)" : "rgba(248,113,113,0.28)",
+      color: c.close >= c.open ? "rgba(34,197,94,0.28)" : "rgba(239,68,68,0.28)",
     })));
 
     // ── Overlay indicators (use configured params) ─────────────────────────
@@ -301,10 +301,10 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
       const rp = p("rsi", "period", 14);
       const data = rsiSeries(candles, rp);
       if (data.length > 0) {
-        const rl = rc.addSeries(LineSeries, { color: "#A78BFA", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
+        const rl = rc.addSeries(LineSeries, { color: "#3B82F6", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
         rl.setData(data.map(d => ({ time: d.time as any, value: d.value })));
-        const ob = rc.addSeries(LineSeries, { color: "rgba(248,113,113,0.35)", lineWidth: 1, lastValueVisible: false, priceLineVisible: false });
-        const os = rc.addSeries(LineSeries, { color: "rgba(52,211,153,0.35)",  lineWidth: 1, lastValueVisible: false, priceLineVisible: false });
+        const ob = rc.addSeries(LineSeries, { color: "rgba(239,68,68,0.35)", lineWidth: 1, lastValueVisible: false, priceLineVisible: false });
+        const os = rc.addSeries(LineSeries, { color: "rgba(34,197,94,0.35)",  lineWidth: 1, lastValueVisible: false, priceLineVisible: false });
         const ml = rc.addSeries(LineSeries, { color: "rgba(100,100,150,0.3)",  lineWidth: 1, lastValueVisible: false, priceLineVisible: false });
         ob.setData(data.map(d => ({ time: d.time as any, value: 70 })));
         os.setData(data.map(d => ({ time: d.time as any, value: 30 })));
@@ -329,11 +329,11 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
         h.setData(hist.map(d => ({ time: d.time as any, value: d.value, color: d.color })));
       }
       if (line.length > 0) {
-        const ml = mc.addSeries(LineSeries, { color: "#34D399", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
+        const ml = mc.addSeries(LineSeries, { color: "#22C55E", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
         ml.setData(line.map(d => ({ time: d.time as any, value: d.value })));
       }
       if (signalLine.length > 0) {
-        const sl = mc.addSeries(LineSeries, { color: "#F87171", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
+        const sl = mc.addSeries(LineSeries, { color: "#EF4444", lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
         sl.setData(signalLine.map(d => ({ time: d.time as any, value: d.value })));
       }
       mc.timeScale().fitContent();
@@ -490,7 +490,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
                 marginBottom: -1, textAlign: "left",
                 display: "flex", alignItems: "center", gap: 7,
               }}>
-                <CoinIcon symbol={coin} size={18} fallbackColor={chg >= 0 ? "#34D399" : "#F87171"} />
+                <CoinIcon symbol={coin} size={18} fallbackColor={chg >= 0 ? "#22C55E" : "#EF4444"} />
                 <div>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600, color: active ? "var(--text-1)" : "var(--text-2)", marginBottom: 1 }}>{coin}</div>
                   <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: chg >= 0 ? "var(--bull)" : "var(--bear)", opacity: active ? 1 : 0.6 }}>
@@ -787,13 +787,13 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
         <div style={{ flexShrink: 0, position: "relative", borderTop: "1px solid var(--border)" }}>
           <div style={{
             position: "absolute", top: 4, left: 10, zIndex: 10, pointerEvents: "none",
-            fontFamily: "var(--font-data)", fontSize: 8, color: "#A78BFA",
+            fontFamily: "var(--font-data)", fontSize: 8, color: "#3B82F6",
             display: "flex", alignItems: "center", gap: 4, letterSpacing: "0.04em",
           }}>
             <span style={{ opacity: 0.7 }}>{getIndLabel("rsi", indParams)}</span>
             <span style={{ fontWeight: 600 }}>{techInd?.rsi.toFixed(1) ?? "—"}</span>
-            <span style={{ color: "rgba(248,113,113,0.7)", fontSize: 7 }}>70</span>
-            <span style={{ color: "rgba(52,211,153,0.7)",  fontSize: 7 }}>30</span>
+            <span style={{ color: "rgba(239,68,68,0.7)", fontSize: 7 }}>70</span>
+            <span style={{ color: "rgba(34,197,94,0.7)",  fontSize: 7 }}>30</span>
           </div>
           <div ref={rsiRef} style={{ height: 88 }} />
         </div>
@@ -807,9 +807,9 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
             fontFamily: "var(--font-data)", fontSize: 8,
             display: "flex", alignItems: "center", gap: 5, letterSpacing: "0.04em",
           }}>
-            <span style={{ color: "#34D399", opacity: 0.8 }}>{getIndLabel("macd", indParams)}</span>
-            <span style={{ color: "#34D399", fontSize: 7 }}>MACD</span>
-            <span style={{ color: "#F87171", fontSize: 7 }}>Signal</span>
+            <span style={{ color: "#22C55E", opacity: 0.8 }}>{getIndLabel("macd", indParams)}</span>
+            <span style={{ color: "#22C55E", fontSize: 7 }}>MACD</span>
+            <span style={{ color: "#EF4444", fontSize: 7 }}>Signal</span>
           </div>
           <div ref={macdRef} style={{ height: 88 }} />
         </div>

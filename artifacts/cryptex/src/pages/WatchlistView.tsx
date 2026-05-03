@@ -55,7 +55,7 @@ export default function WatchlistView() {
           if (priceEl) {
             const isUp = lp.price > prev;
             gsap.fromTo(priceEl,
-              { color: isUp ? "#34D399" : "#F87171" },
+              { color: isUp ? "#22C55E" : "#EF4444" },
               { color: "var(--text-1)", duration: 1.1, ease: "power2.out" }
             );
           }
@@ -140,7 +140,7 @@ export default function WatchlistView() {
           <button onClick={() => setShowAdd(!showAdd)} style={{
             display: "flex", alignItems: "center", gap: 6,
             fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--accent)",
-            background: "var(--accent-dim)", border: `1px solid ${showAdd ? "var(--accent)" : "rgba(139,92,246,0.4)"}`,
+            background: "var(--accent-dim)", border: `1px solid ${showAdd ? "var(--accent)" : "rgba(59,130,246,0.4)"}`,
             borderRadius: 6, padding: "7px 14px", cursor: "pointer", transition: "all 0.15s"
           }}>
             <Plus size={13} /> Add Asset
@@ -371,7 +371,7 @@ export default function WatchlistView() {
                   />
                   <button onClick={() => saveAlertTarget(coin.id)} style={{
                     fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--bull)",
-                    background: "var(--bull-bg)", border: "1px solid rgba(52,211,153,0.4)",
+                    background: "var(--bull-bg)", border: "1px solid rgba(34,197,94,0.4)",
                     borderRadius: 4, padding: "3px 10px", cursor: "pointer"
                   }}>Set</button>
                   <button onClick={() => setEditingAlert(null)} style={{
@@ -389,7 +389,7 @@ export default function WatchlistView() {
                     marginBottom: 10, padding: "6px 10px",
                     background: "var(--accent-dim)", borderRadius: 5,
                     display: "flex", justifyContent: "space-between", alignItems: "center",
-                    cursor: "pointer", border: "1px solid rgba(139,92,246,0.25)"
+                    cursor: "pointer", border: "1px solid rgba(59,130,246,0.25)"
                   }}>
                   <span style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--accent)" }}>🔔 Alert at</span>
                   <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--accent)", fontWeight: 600 }}>

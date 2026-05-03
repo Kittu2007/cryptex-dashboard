@@ -27,8 +27,8 @@ function PortfolioChart({ range, setRange }: { range: string; setRange: (r: stri
     });
     const candles = generateCandles("BTC", "1M");
     const series = chart.addSeries(AreaSeries, {
-      lineColor: "#A78BFA", topColor: "rgba(167,139,250,0.2)", bottomColor: "rgba(167,139,250,0)",
-      lineWidth: 2, priceLineColor: "#A78BFA",
+      lineColor: "#3B82F6", topColor: "rgba(59,130,246,0.2)", bottomColor: "rgba(59,130,246,0)",
+      lineWidth: 2, priceLineColor: "#3B82F6",
     });
     series.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
     chart.timeScale().fitContent();
@@ -305,12 +305,12 @@ export default function PortfolioView() {
               <button key={f} onClick={() => { setTxFilter(f); setTxPage(0); }} style={{
                 fontFamily: "var(--font-ui)", fontSize: 11,
                 background: txFilter === f
-                  ? f === "BUY" ? "rgba(52,211,153,0.12)" : f === "SELL" ? "rgba(248,113,113,0.12)" : "var(--accent-dim)"
+                  ? f === "BUY" ? "rgba(34,197,94,0.12)" : f === "SELL" ? "rgba(239,68,68,0.12)" : "var(--accent-dim)"
                   : "var(--bg-surface)",
                 color: txFilter === f
                   ? f === "BUY" ? "var(--bull)" : f === "SELL" ? "var(--bear)" : "var(--accent)"
                   : "var(--text-2)",
-                border: `1px solid ${txFilter === f ? (f === "BUY" ? "rgba(52,211,153,0.4)" : f === "SELL" ? "rgba(248,113,113,0.4)" : "var(--accent)") : "var(--border)"}`,
+                border: `1px solid ${txFilter === f ? (f === "BUY" ? "rgba(34,197,94,0.4)" : f === "SELL" ? "rgba(239,68,68,0.4)" : "var(--accent)") : "var(--border)"}`,
                 borderRadius: 5, padding: "5px 12px", cursor: "pointer", transition: "all 0.15s"
               }}>
                 {f === "All" ? `All (${transactions.length})` : `${f} (${transactions.filter(t => t.type === f).length})`}
@@ -431,7 +431,7 @@ export default function PortfolioView() {
                 <div style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   padding: "10px 12px", background: "var(--bull-bg)",
-                  borderRadius: 6, border: "1px solid rgba(52,211,153,0.2)"
+                  borderRadius: 6, border: "1px solid rgba(34,197,94,0.2)"
                 }}>
                   <div>
                     <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-1)", fontWeight: 500 }}>{bestTrade.asset}</div>
@@ -487,8 +487,8 @@ export default function PortfolioView() {
                     </span>
                     <div style={{
                       width: "100%", height: `${Math.abs(m.pct) * 5}px`,
-                      background: m.up ? "rgba(52,211,153,0.3)" : "rgba(248,113,113,0.3)",
-                      borderRadius: 3, border: `1px solid ${m.up ? "rgba(52,211,153,0.5)" : "rgba(248,113,113,0.5)"}`
+                      background: m.up ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
+                      borderRadius: 3, border: `1px solid ${m.up ? "rgba(34,197,94,0.5)" : "rgba(239,68,68,0.5)"}`
                     }} />
                     <span style={{ fontFamily: "var(--font-ui)", fontSize: 8, color: "var(--text-3)" }}>{m.month}</span>
                   </div>

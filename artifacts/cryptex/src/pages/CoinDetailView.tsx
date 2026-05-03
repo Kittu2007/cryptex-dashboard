@@ -203,21 +203,21 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
 
     if (chartType === "Candle") {
       const series = chart.addSeries(CandlestickSeries, {
-        upColor:         "#34D399", downColor:        "#F87171",
-        borderUpColor:   "#34D399", borderDownColor:  "#F87171",
-        wickUpColor:     "#34D399", wickDownColor:    "#F87171",
+        upColor:         "#22C55E", downColor:        "#EF4444",
+        borderUpColor:   "#22C55E", borderDownColor:  "#EF4444",
+        wickUpColor:     "#22C55E", wickDownColor:    "#EF4444",
       });
       series.setData(candleData as any);
     } else if (chartType === "Line") {
       const series = chart.addSeries(LineSeries, {
-        color: "#A78BFA", lineWidth: 2, priceLineColor: "#A78BFA",
+        color: "#3B82F6", lineWidth: 2, priceLineColor: "#3B82F6",
       });
       series.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
     } else {
       const series = chart.addSeries(AreaSeries, {
-        lineColor: "#A78BFA", topColor: "rgba(167,139,250,0.28)",
-        bottomColor: "rgba(167,139,250,0.0)", lineWidth: 2,
-        priceLineColor: "#A78BFA",
+        lineColor: "#3B82F6", topColor: "rgba(59,130,246,0.28)",
+        bottomColor: "rgba(59,130,246,0.0)", lineWidth: 2,
+        priceLineColor: "#3B82F6",
       });
       series.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
     }
@@ -233,7 +233,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
     volSeries.setData(candles.map(c => ({
       time:  c.time as any,
       value: c.value,
-      color: c.close >= c.open ? "rgba(52,211,153,0.22)" : "rgba(248,113,113,0.22)",
+      color: c.close >= c.open ? "rgba(34,197,94,0.22)" : "rgba(239,68,68,0.22)",
     })));
 
     chart.timeScale().fitContent();
@@ -346,7 +346,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
                   fontFamily: "var(--font-data)", fontSize: 10,
                   background: range === r ? "var(--accent-dim)" : "none",
                   color: range === r ? "var(--accent)" : "var(--text-3)",
-                  border: range === r ? "1px solid rgba(139,92,246,0.4)" : "1px solid transparent",
+                  border: range === r ? "1px solid rgba(59,130,246,0.4)" : "1px solid transparent",
                   borderRadius: 4, padding: "3px 9px", cursor: "pointer", transition: "all 0.15s",
                 }}>{r}</button>
               ))}
@@ -524,7 +524,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
               <div style={{ height: 5, background: "var(--bg-raised)", borderRadius: 3, position: "relative", overflow: "visible" }}>
                 <div style={{
                   position: "absolute", top: 0, left: 0, height: "100%", width: "100%",
-                  background: "linear-gradient(90deg, rgba(248,113,113,0.2), rgba(52,211,153,0.2))",
+                  background: "linear-gradient(90deg, rgba(239,68,68,0.2), rgba(34,197,94,0.2))",
                   borderRadius: 3,
                 }} />
                 <div style={{
@@ -532,7 +532,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
                   transform: "translate(-50%, -50%)",
                   width: 10, height: 10, borderRadius: "50%",
                   background: "var(--bg-void)", border: "2px solid var(--accent)",
-                  boxShadow: "0 0 7px rgba(139,92,246,0.6)",
+                  boxShadow: "0 0 7px rgba(59,130,246,0.6)",
                 }} />
               </div>
               <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-3)", textAlign: "center", marginTop: 5 }}>
@@ -612,12 +612,12 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
               </div>
               <div style={{ height: 7, borderRadius: 4, overflow: "hidden", display: "flex", marginBottom: 6 }}>
                 <div style={{ width: `${analyst.bull}%`,    height: "100%", background: "var(--bull)" }} />
-                <div style={{ width: `${analyst.neutral}%`, height: "100%", background: "#A78BFA"      }} />
+                <div style={{ width: `${analyst.neutral}%`, height: "100%", background: "#3B82F6"      }} />
                 <div style={{ flex: 1,                      height: "100%", background: "var(--bear)"  }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--bull)" }}>Buy {analyst.bull}%</span>
-                <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "#A78BFA"     }}>Hold {analyst.neutral}%</span>
+                <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "#3B82F6"     }}>Hold {analyst.neutral}%</span>
                 <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--bear)" }}>Sell {analyst.bear}%</span>
               </div>
             </div>
