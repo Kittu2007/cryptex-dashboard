@@ -22,7 +22,7 @@ const COIN_STATS: Record<string, {
 const PAIR_LIST = ["BTC", "ETH", "SOL", "BNB", "MATIC"];
 const MOCK_ADDRESS = "0x3f5C...8aD1";
 
-export default function TopRibbon() {
+export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
   const ribbonRef   = useRef<HTMLDivElement>(null);
   const pairRef     = useRef<HTMLDivElement>(null);
   const walletRef   = useRef<HTMLDivElement>(null);
@@ -101,6 +101,27 @@ export default function TopRibbon() {
 
   return (
     <div className="top-ribbon" ref={ribbonRef} style={{ paddingLeft: 20, paddingRight: 16, gap: 0, position: "relative", overflow: "visible" }}>
+
+      {/* ── Hamburger — mobile only ── */}
+      {onMenuOpen && (
+        <button
+          className="show-mobile"
+          onClick={onMenuOpen}
+          aria-label="Open menu"
+          style={{
+            display: "none", // overridden to flex by .show-mobile on mobile
+            alignItems: "center", justifyContent: "center",
+            background: "none", border: "none", cursor: "pointer",
+            color: "var(--text-2)", padding: "4px 8px 4px 0", marginRight: 4, flexShrink: 0,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect y="3"  width="18" height="1.8" rx="0.9" fill="currentColor"/>
+            <rect y="8"  width="18" height="1.8" rx="0.9" fill="currentColor"/>
+            <rect y="13" width="18" height="1.8" rx="0.9" fill="currentColor"/>
+          </svg>
+        </button>
+      )}
 
       {/* ── Pair selector + price ── */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", flexShrink: 0 }} ref={pairRef}>

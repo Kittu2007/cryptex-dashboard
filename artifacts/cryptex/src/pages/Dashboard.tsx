@@ -65,6 +65,7 @@ export default function Dashboard() {
   const [priceChange,     setPriceChange]     = useState(INITIAL_CHANGE);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isMobile,        setIsMobile]        = useState(() => window.innerWidth <= 768);
+  const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false);
   const livePriceRef = useRef(INITIAL_PRICE);
   const contentRef   = useRef<HTMLDivElement>(null);
 
@@ -159,16 +160,24 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-void)", transition: "background-color 0.3s ease" }}>
+      {/* Mobile sidebar backdrop */}
+      <div
+        className={`sidebar-backdrop${mobileMenuOpen ? " open" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
       <Sidebar
         active={activeNav}
         onNav={handleNav}
         expanded={sidebarExpanded}
         onToggle={() => setSidebarExpanded(v => !v)}
+        mobileOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
       />
 
       <div className="main-content" style={{ display: "flex", flexDirection: "column", height: "100vh", marginLeft: sidebarW }}>
         <div style={{ flexShrink: 0 }}>
-          <TopRibbon />
+          <TopRibbon onMenuOpen={() => setMobileMenuOpen(true)} />
           <TickerTape />
         </div>
 

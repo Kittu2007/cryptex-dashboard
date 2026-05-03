@@ -331,9 +331,25 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   .hide-tablet { display: none !important; }
 }
 
+/* ── Mobile sidebar backdrop ───────────────────────────────────────────────── */
+.sidebar-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 199;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.sidebar-backdrop.open { display: block; }
+
 /* ── Small tablet / large mobile (481px – 768px) ──────────────────────────── */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), background-color 0.3s ease, border-color 0.3s ease !important;
+    width: 220px !important;
+    z-index: 200;
+  }
+  .sidebar.mobile-open { transform: translateX(0); }
   .main-content { margin-left: 0; padding-bottom: 60px; }
 
   .bottom-nav {

@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import {
   LayoutDashboard, TrendingUp, Briefcase, Star, Newspaper,
-  Settings, User, ChevronLeft, ChevronRight,
+  Settings, User, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 
 export type NavId = "dashboard" | "markets" | "portfolio" | "watchlist" | "news" | "settings" | "profile";
@@ -114,25 +114,35 @@ export interface SidebarProps {
   onNav: (id: NavId) => void;
   expanded: boolean;
   onToggle: () => void;
+  mobileOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ active, onNav, expanded, onToggle }: SidebarProps) {
+export default function Sidebar({ active, onNav, expanded, onToggle, mobileOpen, onClose }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const logoRef    = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Skip GSAP entrance animation on mobile — CSS transform handles slide-in
+    if (window.innerWidth <= 768) return;
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
     tl.from(sidebarRef.current, { x: -64, opacity: 0, duration: 0.48 })
       .from(logoRef.current,    { opacity: 0, scale: 0.82, duration: 0.3 }, "-=0.22")
       .from(".nav-item",        { opacity: 0, x: -10, stagger: 0.06, duration: 0.28 }, "-=0.14");
   }, []);
 
+  // On mobile, wrap onNav to also close the drawer
+  function handleNavWithClose(id: NavId) {
+    onNav(id);
+    onClose?.();
+  }
+
   const [toggleHovered, setToggleHovered] = useState(false);
 
   return (
     <div
       ref={sidebarRef}
-      className="sidebar"
+      className={`sidebar${mobileOpen ? " mobile-open" : ""}`}
       style={{
         width: expanded ? 192 : 64,
         transition: "width 0.25s cubic-bezier(0.4,0,0.2,1)",
@@ -141,9 +151,26 @@ export default function Sidebar({ active, onNav, expanded, onToggle }: SidebarPr
         zIndex: 40,
       }}
     >
+      {/* ── Mobile close button ── */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          aria-label="Close menu"
+          style={{
+            position: "absolute", top: 12, right: 12,
+            background: "var(--bg-raised)", border: "1px solid var(--border-2)",
+            borderRadius: 6, padding: "4px 6px", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "var(--text-3)", zIndex: 10,
+          }}
+        >
+          <X size={14} />
+        </button>
+      )}
+
       {/* ── Logo ── */}
       <div
-        onClick={() => onNav("dashboard")}
+        onClick={() => handleNavWithClose("dashboard")}
         style={{
           height: 56,
           display: "flex", alignItems: "center",
@@ -184,7 +211,7 @@ export default function Sidebar({ active, onNav, expanded, onToggle }: SidebarPr
       {/* ── Main nav ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", paddingTop: 4 }}>
         {navItems.map(item => (
-          <NavButton key={item.id} {...item} active={active} onNav={onNav} expanded={expanded} />
+          <NavButton key={item.id} {...item} active={active} onNav={handleNavWithClose} expanded={expanded || !!mobileOpen} />
         ))}
       </div>
 
@@ -193,7 +220,7 @@ export default function Sidebar({ active, onNav, expanded, onToggle }: SidebarPr
         <div style={{ height: 1, background: "var(--border)", margin: "0 10px 2px" }} />
 
         {bottomItems.map(item => (
-          <NavButton key={item.id} {...item} active={active} onNav={onNav} expanded={expanded} />
+          <NavButton key={item.id} {...item} active={active} onNav={handleNavWithClose} expanded={expanded || !!mobileOpen} />
         ))}
 
         {/* Collapse / Expand toggle */}
