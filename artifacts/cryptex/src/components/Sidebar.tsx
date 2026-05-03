@@ -146,13 +146,13 @@ export default function Sidebar({ active, onNav, expanded, onToggle, mobileOpen,
       style={{
         width: expanded ? 192 : 64,
         transition: "width 0.25s cubic-bezier(0.4,0,0.2,1)",
-        overflow: "hidden",
+        overflow: "visible",
         alignItems: "stretch",
         zIndex: 40,
       }}
     >
-      {/* ── Mobile close button ── */}
-      {onClose && (
+      {/* ── Mobile close button — only shown when the drawer is open ── */}
+      {mobileOpen && onClose && (
         <button
           onClick={onClose}
           aria-label="Close menu"
