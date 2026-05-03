@@ -9,7 +9,8 @@ import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE      = 8;
+const NEWS_PAGE_SIZE = 4;
 
 function PageNav({
   page, pageCount, onPrev, onNext,
@@ -358,8 +359,8 @@ function NewsCol() {
   const [hovered,  setHovered]  = useState<number | null>(null);
   const [page,     setPage]     = useState(0);
 
-  const pageCount  = Math.ceil(news.length / PAGE_SIZE);
-  const pageSlice  = news.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const pageCount  = Math.ceil(news.length / NEWS_PAGE_SIZE);
+  const pageSlice  = news.slice(page * NEWS_PAGE_SIZE, (page + 1) * NEWS_PAGE_SIZE);
 
   const sentimentLabel = (s: number) => s >= 65 ? "Bullish" : s < 40 ? "Bearish" : "Neutral";
   const sentimentColor = (s: number) => s >= 65 ? "var(--bull)" : s < 40 ? "var(--bear)" : "var(--accent)";
