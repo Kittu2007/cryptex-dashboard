@@ -30,32 +30,21 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartInstRef = useRef<ReturnType<typeof createChart> | null>(null);
 
-  const [activeCoin,      setActiveCoin]      = useState("BTC");
   const [activeRange,     setActiveRange]     = useState("1D");
   const [activeChartType, setActiveChartType] = useState<ChartType>("Candlestick");
   const [maValues,        setMaValues]        = useState({ ma7: 0, ma25: 0, ma99: 0 });
-  const [coinPrice,       setCoinPrice]       = useState(COIN_BASE_PRICES["BTC"]);
-  const [coinChange,      setCoinChange]      = useState(2.4);
 
-  const { settings, formatPrice, livePrices } = useApp();
+  const { settings, formatPrice, livePrices, activePair, setActivePair } = useApp();
+
+  // Coin price + change come directly from shared live state
+  const coinLive   = livePrices[activePair];
+  const coinPrice  = coinLive?.price     ?? COIN_BASE_PRICES[activePair] ?? 60000;
+  const coinChange = coinLive?.change24h ?? 0;
 
   // Sync chart type when Settings default changes
   useEffect(() => {
     setActiveChartType(settings.chartType as ChartType);
   }, [settings.chartType]);
-
-  // Update displayed price whenever coin or livePrices changes
-  useEffect(() => {
-    const lp = livePrices[activeCoin];
-    if (lp) {
-      setCoinPrice(lp.price);
-      setCoinChange(lp.change24h);
-    } else {
-      setCoinPrice(COIN_BASE_PRICES[activeCoin] ?? 60000);
-      const coin = coinTabs.indexOf(activeCoin);
-      setCoinChange([2.4, 1.8, -0.6, 3.1, -1.2][coin] ?? 0);
-    }
-  }, [activeCoin, livePrices]);
 
   // Build / rebuild the chart
   const buildChart = useCallback(() => {
@@ -99,7 +88,7 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
     });
     chartInstRef.current = chart;
 
-    const candles = generateCandles(activeCoin, activeRange);
+    const candles = generateCandles(activePair, activeRange);
 
     // Compute MAs and update display
     const ma7  = computeMA(candles, 7);
@@ -152,7 +141,7 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
     chartRef.current && ro.observe(chartRef.current);
 
     return () => { ro.disconnect(); };
-  }, [activeCoin, activeRange, activeChartType, settings.theme]);
+  }, [activePair, activeRange, activeChartType, settings.theme]);
 
   useEffect(() => {
     const cleanup = buildChart();
@@ -167,19 +156,19 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
 
   // Animate coin switch — flash price
   const priceEl = useRef<HTMLSpanElement>(null);
-  const prevCoin = useRef(activeCoin);
+  const prevCoin = useRef(activePair);
   useEffect(() => {
-    if (prevCoin.current !== activeCoin && priceEl.current) {
-      prevCoin.current = activeCoin;
+    if (prevCoin.current !== activePair && priceEl.current) {
+      prevCoin.current = activePair;
       gsap.fromTo(priceEl.current,
         { opacity: 0.3, y: 6 },
         { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
       );
     }
-  }, [activeCoin, coinPrice]);
+  }, [activePair, coinPrice]);
 
   const isUp   = coinChange >= 0;
-  const meta   = COIN_META[activeCoin] ?? { name: activeCoin };
+  const meta   = COIN_META[activePair] ?? { name: activePair };
   const maColors = ["#EAB308", "#6B7280", "#60A5FA"];
   const fmtMA = (v: number) => v > 0
     ? v < 1 ? v.toFixed(4) : v.toLocaleString("en-US", { maximumFractionDigits: 0 })
@@ -203,9 +192,9 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
             const lp   = livePrices[coin];
             const p    = lp?.price ?? COIN_BASE_PRICES[coin] ?? 0;
             const chg  = lp?.change24h ?? 0;
-            const active = activeCoin === coin;
+            const active = activePair === coin;
             return (
-              <button key={coin} onClick={() => setActiveCoin(coin)} style={{
+              <button key={coin} onClick={() => setActivePair(coin)} style={{
                 background: "none", border: "none", cursor: "pointer",
                 padding: "0 14px 10px",
                 borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",

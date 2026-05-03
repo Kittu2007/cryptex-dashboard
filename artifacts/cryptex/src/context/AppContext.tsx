@@ -71,6 +71,8 @@ interface AppContextType {
   currencyRate: number;
   livePrices: Record<string, LiveCoinPrice>;
   liveMarket: LiveMarketStats;
+  activePair: string;
+  setActivePair: (pair: string) => void;
 }
 
 const settingsDefaults: Settings = {
@@ -118,6 +120,7 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(settingsDefaults);
   const [profile, setProfile] = useState<Profile>(profileDefaults);
+  const [activePair, setActivePair] = useState("BTC");
   const [livePrices, setLivePrices] = useState<Record<string, LiveCoinPrice>>(seedLivePrices());
   const [liveMarket, setLiveMarket] = useState<LiveMarketStats>({
     marketCap: 1.32,
@@ -221,6 +224,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       profile, updateProfile,
       formatPrice, currencySymbol, currencyRate,
       livePrices, liveMarket,
+      activePair, setActivePair,
     }}>
       {children}
     </AppContext.Provider>

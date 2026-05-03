@@ -120,7 +120,7 @@ export default function Dashboard() {
 
       <div className="main-content" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <div style={{ flexShrink: 0 }}>
-          <TopRibbon livePrice={livePrice} priceChange={priceChange} />
+          <TopRibbon />
           <TickerTape />
         </div>
 
