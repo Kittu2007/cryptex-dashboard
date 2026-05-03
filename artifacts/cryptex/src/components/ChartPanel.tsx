@@ -422,7 +422,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, overflow: "hidden" }}>
+    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
 
       {/* ── Controls toolbar ── */}
       <div style={{

@@ -19,12 +19,13 @@ const PAIR_LIST = ["BTC", "ETH", "SOL", "BNB", "MATIC"];
 const MOCK_ADDRESS = "0x3f5C...8aD1";
 
 export default function TopRibbon() {
-  const ribbonRef  = useRef<HTMLDivElement>(null);
-  const dropRef    = useRef<HTMLDivElement>(null);
+  const ribbonRef   = useRef<HTMLDivElement>(null);
+  const pairRef     = useRef<HTMLDivElement>(null);
+  const walletRef   = useRef<HTMLDivElement>(null);
   const [dropOpen,   setDropOpen]   = useState(false);
   const [connected,  setConnected]  = useState(false);
   const [walletMenu, setWalletMenu] = useState(false);
-  const priceRef = useRef<HTMLSpanElement>(null);
+  const priceRef  = useRef<HTMLSpanElement>(null);
   const prevPrice = useRef(0);
 
   const {
@@ -58,18 +59,27 @@ export default function TopRibbon() {
     );
   }, [price]);
 
-  // Close dropdown on outside click
+  // Close pair dropdown on outside click
   useEffect(() => {
-    if (!dropOpen && !walletMenu) return;
+    if (!dropOpen) return;
     const handler = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
+      if (pairRef.current && !pairRef.current.contains(e.target as Node))
         setDropOpen(false);
-        setWalletMenu(false);
-      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [dropOpen, walletMenu]);
+  }, [dropOpen]);
+
+  // Close wallet menu on outside click
+  useEffect(() => {
+    if (!walletMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (walletRef.current && !walletRef.current.contains(e.target as Node))
+        setWalletMenu(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [walletMenu]);
 
   const ribbonStats = [
     { label: "24H HIGH", value: formatPrice(high24h) },
@@ -83,7 +93,7 @@ export default function TopRibbon() {
     <div className="top-ribbon" ref={ribbonRef} style={{ paddingLeft: 20, paddingRight: 16, gap: 0, position: "relative" }}>
 
       {/* ── Pair selector + price ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }} ref={dropRef}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }} ref={pairRef}>
 
         {/* Pair button */}
         <button
@@ -200,7 +210,7 @@ export default function TopRibbon() {
       </div>
 
       {/* ── Connect Wallet ── */}
-      <div style={{ marginLeft: "auto", position: "relative" }}>
+      <div ref={walletRef} style={{ marginLeft: "auto", position: "relative" }}>
         {connected ? (
           <button
             onClick={() => { setWalletMenu(v => !v); setDropOpen(false); }}

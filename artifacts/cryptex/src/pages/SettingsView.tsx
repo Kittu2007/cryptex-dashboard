@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { Check, Bell, Monitor, Database, Shield, RefreshCw } from "lucide-react";
 import { useApp } from "../context/AppContext";
@@ -35,15 +36,34 @@ function SelectField({ value, options, onChange }: {
   onChange: (v: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, right: 0, minWidth: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 4, right: window.innerWidth - r.right, minWidth: r.width });
+    }
+    const handler = (e: MouseEvent) => {
+      if (!dropRef.current?.contains(e.target as Node) && !btnRef.current?.contains(e.target as Node))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div style={{ position: "relative" }}>
+    <div>
       <button
+        ref={btnRef}
         onClick={() => setOpen(o => !o)}
         style={{
           fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)",
-          background: "var(--bg-raised)", border: "1px solid var(--border-2)",
+          background: "var(--bg-raised)", border: `1px solid ${open ? "var(--accent)" : "var(--border-2)"}`,
           borderRadius: 5, padding: "4px 28px 4px 12px", cursor: "pointer",
-          position: "relative", transition: "border-color 0.15s"
+          position: "relative", transition: "border-color 0.15s", whiteSpace: "nowrap",
         }}
         onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--accent)")}
         onMouseLeave={e => !open && (e.currentTarget.style.borderColor = "var(--border-2)")}
@@ -52,34 +72,43 @@ function SelectField({ value, options, onChange }: {
         <span style={{
           position: "absolute", right: 8, top: "50%",
           transform: `translateY(-50%) rotate(${open ? "180deg" : "0deg"})`,
-          color: "var(--text-3)", fontSize: 8, transition: "transform 0.15s"
+          color: "var(--text-3)", fontSize: 8, transition: "transform 0.15s",
         }}>▼</span>
       </button>
-      {open && (
-        <div style={{
-          position: "absolute", right: 0, top: "calc(100% + 4px)",
-          background: "var(--bg-raised)", border: "1px solid var(--border-2)",
-          borderRadius: 6, zIndex: 200, minWidth: "100%", overflow: "hidden",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
-        }}>
+      {open && createPortal(
+        <div
+          ref={dropRef}
+          style={{
+            position: "fixed", top: pos.top, right: pos.right, minWidth: pos.minWidth,
+            background: "var(--bg-surface)", border: "1px solid var(--border-2)",
+            borderRadius: 8, zIndex: 9999,
+            boxShadow: "0 12px 36px rgba(0,0,0,0.55)",
+            overflow: "hidden",
+          }}
+        >
           {options.map(opt => (
-            <div key={opt} onClick={() => { onChange(opt); setOpen(false); }} style={{
-              padding: "8px 14px",
-              fontFamily: "var(--font-data)", fontSize: 11,
-              color: opt === value ? "var(--accent)" : "var(--text-1)",
-              background: opt === value ? "var(--accent-dim)" : "transparent",
-              cursor: "pointer", transition: "background 0.1s",
-              display: "flex", alignItems: "center", gap: 8
-            }}
-              onMouseEnter={e => { if (opt !== value) e.currentTarget.style.background = "var(--bg-hover)"; }}
+            <div
+              key={opt}
+              onClick={() => { onChange(opt); setOpen(false); }}
+              style={{
+                padding: "9px 16px",
+                fontFamily: "var(--font-data)", fontSize: 11,
+                color: opt === value ? "var(--accent)" : "var(--text-1)",
+                background: opt === value ? "var(--accent-dim)" : "transparent",
+                cursor: "pointer", transition: "background 0.1s",
+                display: "flex", alignItems: "center", gap: 8,
+              }}
+              onMouseEnter={e => { if (opt !== value) e.currentTarget.style.background = "var(--bg-raised)"; }}
               onMouseLeave={e => { if (opt !== value) e.currentTarget.style.background = "transparent"; }}
             >
-              {opt === value && <Check size={10} style={{ color: "var(--accent)" }} />}
-              {opt !== value && <span style={{ width: 10 }} />}
+              <span style={{ width: 12, display: "flex", alignItems: "center" }}>
+                {opt === value && <Check size={10} style={{ color: "var(--accent)" }} />}
+              </span>
               {opt}
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
