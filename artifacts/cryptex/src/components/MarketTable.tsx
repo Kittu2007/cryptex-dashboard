@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronUp, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "./Sparkline";
+import CoinIcon from "./CoinIcon";
 import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -176,15 +177,7 @@ export default function MarketTable() {
                     </td>
                     <td style={{ padding: "10px 16px 10px 0" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: "50%",
-                          background: coin.avatar + "20", border: `1px solid ${coin.avatar}40`,
-                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-                        }}>
-                          <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 600, color: coin.avatar }}>
-                            {coin.symbol[0]}
-                          </span>
-                        </div>
+                        <CoinIcon symbol={coin.symbol} size={28} fallbackColor={coin.avatar} />
                         <div>
                           <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
                           <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{coin.symbol}</div>

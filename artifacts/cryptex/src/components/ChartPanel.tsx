@@ -10,6 +10,7 @@ import {
   COIN_BASE_PRICES, COIN_META, TechIndicators,
   smaSeries, emaSeries, bbSeries, vwapSeries, rsiSeries, macdSeries, stochSeries,
 } from "../mockData";
+import CoinIcon from "./CoinIcon";
 import { useApp } from "../context/AppContext";
 
 interface ChartPanelProps { livePrice: number; priceChange: number; }
@@ -484,13 +485,17 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
             return (
               <button key={coin} onClick={() => setActivePair(coin)} style={{
                 background: "none", border: "none", cursor: "pointer",
-                padding: "0 14px 10px",
+                padding: "0 12px 10px",
                 borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
                 marginBottom: -1, textAlign: "left",
+                display: "flex", alignItems: "center", gap: 7,
               }}>
-                <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600, color: active ? "var(--text-1)" : "var(--text-2)", marginBottom: 1 }}>{coin}</div>
-                <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: chg >= 0 ? "var(--bull)" : "var(--bear)", opacity: active ? 1 : 0.6 }}>
-                  {chg >= 0 ? "+" : ""}{chg.toFixed(1)}%
+                <CoinIcon symbol={coin} size={18} fallbackColor={chg >= 0 ? "#34D399" : "#F87171"} />
+                <div>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600, color: active ? "var(--text-1)" : "var(--text-2)", marginBottom: 1 }}>{coin}</div>
+                  <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: chg >= 0 ? "var(--bull)" : "var(--bear)", opacity: active ? 1 : 0.6 }}>
+                    {chg >= 0 ? "+" : ""}{chg.toFixed(1)}%
+                  </div>
                 </div>
               </button>
             );

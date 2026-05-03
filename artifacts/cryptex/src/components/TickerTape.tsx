@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useApp } from "../context/AppContext";
+import CoinIcon from "./CoinIcon";
 import gsap from "gsap";
 
 const TICKER_SYMBOLS = ["BTC", "ETH", "SOL", "BNB", "ADA", "DOT", "LINK", "MATIC", "AVAX", "INJ"];
@@ -41,6 +42,7 @@ export default function TickerTape() {
               padding: "0 20px", borderRight: "1px solid var(--border)",
               whiteSpace: "nowrap", height: 28
             }}>
+              <CoinIcon symbol={sym} size={14} fallbackColor="#A78BFA" />
               <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", fontWeight: 600 }}>{sym}</span>
               <span
                 ref={el => { if (i < TICKER_SYMBOLS.length) itemRefs.current[sym] = el; }}

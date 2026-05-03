@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ChevronDown, Wallet, Check, X, Zap } from "lucide-react";
+import { ChevronDown, Wallet, X, Zap } from "lucide-react";
+import CoinIcon from "./CoinIcon";
 import { useApp } from "../context/AppContext";
 
 // Per-coin 24H stat anchors (% offsets from current price)
@@ -147,10 +148,7 @@ export default function TopRibbon() {
                   onMouseLeave={e => { if (!active) e.currentTarget.style.background = "none"; }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{
-                      width: 6, height: 6, borderRadius: "50%",
-                      background: chg >= 0 ? "var(--bull)" : "var(--bear)",
-                    }} />
+                    <CoinIcon symbol={sym} size={20} fallbackColor={chg >= 0 ? "var(--bull)" : "var(--bear)"} />
                     <span style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}>
                       {sym} / {settings.currency}
                     </span>
