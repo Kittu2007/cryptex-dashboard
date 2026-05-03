@@ -7,6 +7,14 @@ import type { Currency } from "../context/AppContext";
 
 const CURRENCIES: Currency[] = ["USD", "EUR", "GBP", "JPY", "INR"];
 
+const CURRENCY_NAMES: Record<Currency, string> = {
+  USD: "US Dollar",
+  EUR: "Euro",
+  GBP: "British Pound",
+  JPY: "Japanese Yen",
+  INR: "Indian Rupee",
+};
+
 // Per-coin 24H stat anchors (% offsets from current price)
 const COIN_STATS: Record<string, {
   highPct: number; lowPct: number;
@@ -23,12 +31,14 @@ const PAIR_LIST = ["BTC", "ETH", "SOL", "BNB", "MATIC"];
 const MOCK_ADDRESS = "0x3f5C...8aD1";
 
 export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
-  const ribbonRef   = useRef<HTMLDivElement>(null);
-  const pairRef     = useRef<HTMLDivElement>(null);
-  const walletRef   = useRef<HTMLDivElement>(null);
-  const [dropOpen,   setDropOpen]   = useState(false);
-  const [connected,  setConnected]  = useState(false);
-  const [walletMenu, setWalletMenu] = useState(false);
+  const ribbonRef    = useRef<HTMLDivElement>(null);
+  const pairRef      = useRef<HTMLDivElement>(null);
+  const walletRef    = useRef<HTMLDivElement>(null);
+  const currencyRef  = useRef<HTMLDivElement>(null);
+  const [dropOpen,      setDropOpen]      = useState(false);
+  const [connected,     setConnected]     = useState(false);
+  const [walletMenu,    setWalletMenu]    = useState(false);
+  const [currencyOpen,  setCurrencyOpen]  = useState(false);
   const priceRef  = useRef<HTMLSpanElement>(null);
   const prevPrice = useRef(0);
 
@@ -40,9 +50,6 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
 
   const isDark = settings.theme !== "Light";
   const toggleTheme = () => updateSetting("theme", isDark ? "Light" : "Dark");
-
-  const currIdx      = CURRENCIES.indexOf(settings.currency);
-  const cycleCurrency = () => updateSetting("currency", CURRENCIES[(currIdx + 1) % CURRENCIES.length]);
 
   const coin   = livePrices[activePair];
   const price  = coin?.price  ?? 0;
@@ -90,6 +97,17 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [walletMenu]);
+
+  // Close currency dropdown on outside click
+  useEffect(() => {
+    if (!currencyOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node))
+        setCurrencyOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [currencyOpen]);
 
   const ribbonStats = [
     { label: "24H HIGH", value: formatPrice(high24h) },
@@ -241,25 +259,109 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
       {/* ── Currency + Theme toggles ── */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 14, flexShrink: 0 }}>
 
-        {/* Currency cycle button */}
-        <button
-          onClick={cycleCurrency}
-          title={`Switch currency (${CURRENCIES.map(c => CURRENCY_SYMBOLS[c] + c).join(" → ")})`}
-          style={{
-            display: "flex", alignItems: "center", gap: 4,
-            fontFamily: "var(--font-data)", fontSize: 10, fontWeight: 600,
-            color: "var(--accent)",
-            background: "var(--accent-dim)",
-            border: "1px solid rgba(59,130,246,0.3)",
-            borderRadius: 5, padding: "4px 9px", cursor: "pointer",
-            transition: "all 0.15s", whiteSpace: "nowrap",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.18)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-dim)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)"; }}
-        >
-          <span style={{ fontSize: 11 }}>{CURRENCY_SYMBOLS[settings.currency]}</span>
-          <span className="ribbon-currency-text">{settings.currency}</span>
-        </button>
+        {/* Currency dropdown */}
+        <div ref={currencyRef} style={{ position: "relative" }}>
+          <button
+            onClick={() => { setCurrencyOpen(v => !v); setDropOpen(false); setWalletMenu(false); }}
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              fontFamily: "var(--font-data)", fontSize: 10, fontWeight: 600,
+              color: "var(--accent)",
+              background: currencyOpen ? "rgba(59,130,246,0.18)" : "var(--accent-dim)",
+              border: `1px solid ${currencyOpen ? "var(--accent)" : "rgba(59,130,246,0.3)"}`,
+              borderRadius: 5, padding: "4px 9px", cursor: "pointer",
+              transition: "all 0.15s", whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontSize: 11 }}>{CURRENCY_SYMBOLS[settings.currency]}</span>
+            <span className="ribbon-currency-text">{settings.currency}</span>
+            <ChevronDown size={9} style={{
+              transform: currencyOpen ? "rotate(180deg)" : "none",
+              transition: "transform 0.15s",
+              opacity: 0.7,
+            }} />
+          </button>
+
+          {/* Dropdown panel */}
+          {currencyOpen && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 300,
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-2)",
+              borderRadius: 10,
+              boxShadow: "0 14px 48px rgba(0,0,0,0.45)",
+              overflow: "hidden", minWidth: 190,
+            }}>
+              {/* Header */}
+              <div style={{
+                padding: "8px 12px 6px",
+                borderBottom: "1px solid var(--border)",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <span style={{
+                  fontFamily: "var(--font-ui)", fontSize: 9, fontWeight: 700,
+                  letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)",
+                }}>Select Currency</span>
+                <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-3)" }}>
+                  {CURRENCIES.length} options
+                </span>
+              </div>
+
+              {/* Currency list */}
+              {CURRENCIES.map(cur => {
+                const active = settings.currency === cur;
+                return (
+                  <button
+                    key={cur}
+                    onClick={() => { updateSetting("currency", cur); setCurrencyOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      width: "100%", padding: "9px 12px",
+                      background: active ? "var(--accent-dim)" : "none",
+                      border: "none",
+                      borderLeft: `2px solid ${active ? "var(--accent)" : "transparent"}`,
+                      cursor: "pointer",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = "var(--bg-raised)"; }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.background = "none"; }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{
+                        width: 26, height: 26,
+                        background: active ? "var(--accent)" : "var(--bg-raised)",
+                        borderRadius: 6,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: "var(--font-data)", fontSize: 12, fontWeight: 700,
+                        color: active ? "#fff" : "var(--text-2)",
+                        flexShrink: 0,
+                        transition: "all 0.15s",
+                      }}>
+                        {CURRENCY_SYMBOLS[cur]}
+                      </span>
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{
+                          fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: active ? 600 : 400,
+                          color: active ? "var(--accent)" : "var(--text-1)",
+                        }}>{cur}</div>
+                        <div style={{
+                          fontFamily: "var(--font-ui)", fontSize: 9,
+                          color: "var(--text-3)", marginTop: 1,
+                        }}>{CURRENCY_NAMES[cur]}</div>
+                      </div>
+                    </div>
+                    {active && (
+                      <span style={{
+                        width: 7, height: 7, borderRadius: "50%",
+                        background: "var(--accent)", flexShrink: 0,
+                      }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Theme toggle */}
         <button
