@@ -1,22 +1,58 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, Plus, Bell, BellOff, ExternalLink } from "lucide-react";
+import { ArrowUpRight, Plus, Bell, BellOff, ExternalLink, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { transactions, watchlist, trending, news } from "../mockData";
 import Sparkline from "./Sparkline";
+import CoinIcon from "./CoinIcon";
 import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
 function TransactionsCol() {
-  const { formatPrice } = useApp();
+  const { formatPrice, livePrices } = useApp();
   const [filter, setFilter] = useState<"ALL" | "BUY" | "SELL">("ALL");
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const counts = {
+    ALL:  transactions.length,
+    BUY:  transactions.filter(t => t.type === "BUY").length,
+    SELL: transactions.filter(t => t.type === "SELL").length,
+  };
   const visible = filter === "ALL" ? transactions : transactions.filter(t => t.type === filter);
 
+  const totalBought = transactions.filter(t => t.type === "BUY" && t.status !== "Failed").reduce((s, t) => s + t.total, 0);
+  const totalSold   = transactions.filter(t => t.type === "SELL").reduce((s, t) => s + t.total, 0);
+
+  // Net live P&L across all BUY (non-failed) transactions
+  const livePnL = transactions
+    .filter(t => t.type === "BUY" && t.status !== "Failed")
+    .reduce((sum, tx) => {
+      const lp = livePrices[tx.symbol];
+      const curPrice = lp?.price ?? tx.price;
+      return sum + (curPrice - tx.price) * tx.amount;
+    }, 0);
+
+  useEffect(() => {
+    const items = listRef.current?.querySelectorAll(".tx-row");
+    if (items?.length) {
+      gsap.from(items, { opacity: 0, x: -8, stagger: 0.03, duration: 0.35, ease: "power2.out" });
+    }
+  }, [filter]);
+
   return (
-    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span className="section-label">TRANSACTIONS</span>
+    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1, display: "flex", flexDirection: "column" }}>
+
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span className="section-label">TRANSACTIONS</span>
+          <span style={{
+            fontFamily: "var(--font-data)", fontSize: 9,
+            background: "var(--bg-raised)", color: "var(--text-3)",
+            padding: "1px 6px", borderRadius: 10,
+          }}>{counts.ALL}</span>
+        </div>
         <button style={{
           background: "none", border: "none", cursor: "pointer",
           fontFamily: "var(--font-ui)", fontSize: 10,
@@ -24,71 +60,123 @@ function TransactionsCol() {
         }}>View all <ArrowUpRight size={10} /></button>
       </div>
 
-      {/* Filter pills */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
+      {/* Filter pills with counts */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
         {(["ALL", "BUY", "SELL"] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             fontFamily: "var(--font-ui)", fontSize: 9,
             color: filter === f ? (f === "BUY" ? "var(--bull)" : f === "SELL" ? "var(--bear)" : "var(--accent)") : "var(--text-3)",
             background: filter === f ? (f === "BUY" ? "var(--bull-bg)" : f === "SELL" ? "var(--bear-bg)" : "var(--accent-dim)") : "none",
-            border: `1px solid ${filter === f ? (f === "BUY" ? "var(--bull)" : f === "SELL" ? "var(--bear)" : "var(--accent)") : "var(--border)"}`,
-            borderRadius: 3, padding: "2px 8px", cursor: "pointer", transition: "all 0.15s"
-          }}>{f}</button>
+            border: `1px solid ${filter === f ? (f === "BUY" ? "rgba(52,211,153,0.4)" : f === "SELL" ? "rgba(248,113,113,0.4)" : "var(--accent)") : "var(--border)"}`,
+            borderRadius: 3, padding: "2px 8px", cursor: "pointer", transition: "all 0.15s",
+            display: "flex", alignItems: "center", gap: 4,
+          }}>
+            {f}
+            <span style={{
+              fontFamily: "var(--font-data)", fontSize: 8,
+              opacity: filter === f ? 1 : 0.5,
+            }}>{counts[f]}</span>
+          </button>
         ))}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      {/* Scrollable list */}
+      <div ref={listRef} style={{ flex: 1, overflowY: "auto", maxHeight: 240, marginRight: -4, paddingRight: 4 }}>
         {visible.map((tx, i) => {
-          const isBuy = tx.type === "BUY";
+          const isBuy     = tx.type === "BUY";
           const isPending = tx.status === "Pending";
+          const isFailed  = tx.status === "Failed";
+
+          const lp       = livePrices[tx.symbol];
+          const curPrice = lp?.price ?? tx.price;
+          const pnl      = isBuy && !isFailed ? (curPrice - tx.price) * tx.amount : null;
+          const pnlPct   = pnl !== null ? ((curPrice - tx.price) / tx.price) * 100 : null;
+          const pnlUp    = pnl !== null && pnl >= 0;
+
           return (
-            <div key={i} style={{
-              display: "grid", gridTemplateColumns: "auto 1fr auto",
-              alignItems: "center", gap: 10, padding: "9px 0",
-              borderBottom: i < visible.length - 1 ? "1px solid rgba(31,31,46,0.5)" : "none"
+            <div key={i} className="tx-row" style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto 1fr auto",
+              alignItems: "center", gap: 8, padding: "8px 0",
+              borderBottom: i < visible.length - 1 ? "1px solid rgba(31,31,46,0.5)" : "none",
+              opacity: isFailed ? 0.5 : 1,
             }}>
+              {/* Type badge */}
               <span style={{
-                fontFamily: "var(--font-data)", fontSize: 9,
-                color: isBuy ? "var(--bull)" : "var(--bear)",
-                background: isBuy ? "var(--bull-bg)" : "var(--bear-bg)",
-                padding: "2px 5px", borderRadius: 3, flexShrink: 0
-              }}>{tx.type}</span>
+                fontFamily: "var(--font-data)", fontSize: 8,
+                color: isFailed ? "var(--text-3)" : isBuy ? "var(--bull)" : "var(--bear)",
+                background: isFailed ? "var(--bg-raised)" : isBuy ? "var(--bull-bg)" : "var(--bear-bg)",
+                padding: "2px 5px", borderRadius: 3, flexShrink: 0, letterSpacing: "0.05em",
+              }}>
+                {isFailed ? "FAILED" : tx.type}
+              </span>
+
+              {/* Coin icon */}
+              <CoinIcon symbol={tx.symbol} size={22} fallbackColor="#A78BFA" />
+
+              {/* Name + symbol */}
               <div>
-                <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)" }}>{tx.asset} </span>
-                <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{tx.symbol}</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-                <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)" }}>
-                  {tx.amount} {tx.symbol}
-                </span>
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)" }}>
-                    {formatPrice(tx.price)}
-                  </span>
-                  <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)" }}>{tx.date}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)", fontWeight: 600 }}>{tx.asset}</span>
+                  <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-3)" }}>{tx.symbol}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 1 }}>
+                  <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-3)" }}>{tx.date}</span>
                   {isPending
                     ? <div className="pending-dot" />
-                    : <div style={{ width: 5, height: 5, background: "var(--bull)", borderRadius: "50%", opacity: 0.6 }} />}
+                    : isFailed
+                      ? <span style={{ fontFamily: "var(--font-ui)", fontSize: 8, color: "var(--bear)" }}>✕ failed</span>
+                      : <div style={{ width: 4, height: 4, background: "var(--bull)", borderRadius: "50%", opacity: 0.7 }} />}
                 </div>
+              </div>
+
+              {/* Values */}
+              <div style={{ textAlign: "right" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 }}>
+                  <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)" }}>
+                    {tx.amount} {tx.symbol}
+                  </span>
+                </div>
+                <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)", fontWeight: 600 }}>
+                  {formatPrice(tx.total)}
+                </div>
+                {pnl !== null && (
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2,
+                    fontFamily: "var(--font-data)", fontSize: 9,
+                    color: pnlUp ? "var(--bull)" : "var(--bear)",
+                  }}>
+                    {pnlUp ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
+                    {pnlUp ? "+" : ""}{formatPrice(Math.abs(pnl))}
+                    <span style={{ opacity: 0.8 }}>({pnlUp ? "+" : ""}{pnlPct!.toFixed(1)}%)</span>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Summary row */}
-      <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
+      {/* Summary */}
+      <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexShrink: 0 }}>
         <div>
           <div className="section-label" style={{ marginBottom: 2 }}>TOTAL BOUGHT</div>
-          <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--bull)" }}>
-            {formatPrice(transactions.filter(t => t.type === "BUY").reduce((s, t) => s + t.total, 0))}
+          <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--bull)" }}>{formatPrice(totalBought)}</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div className="section-label" style={{ marginBottom: 2 }}>NET P&L</div>
+          <div style={{
+            fontFamily: "var(--font-data)", fontSize: 11,
+            color: livePnL >= 0 ? "var(--bull)" : "var(--bear)",
+            display: "flex", alignItems: "center", gap: 3,
+          }}>
+            {livePnL >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+            {livePnL >= 0 ? "+" : ""}{formatPrice(Math.abs(livePnL))}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div className="section-label" style={{ marginBottom: 2 }}>TOTAL SOLD</div>
-          <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--bear)" }}>
-            {formatPrice(transactions.filter(t => t.type === "SELL").reduce((s, t) => s + t.total, 0))}
-          </div>
+          <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--bear)" }}>{formatPrice(totalSold)}</div>
         </div>
       </div>
     </div>
@@ -97,10 +185,9 @@ function TransactionsCol() {
 
 function WatchlistCol() {
   const { livePrices, formatPrice } = useApp();
-  const [alerts, setAlerts] = useState<Record<string, boolean>>({ BTC: true, ETH: false, SOL: false, AVAX: false });
+  const [alerts, setAlerts] = useState<Record<string, boolean>>({ BTC: true, ETH: false, SOL: false, BNB: false, LINK: false, AVAX: false });
   const priceRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
-  // Flash price on update
   useEffect(() => {
     for (const coin of watchlist) {
       const lp = livePrices[coin.symbol];
@@ -130,27 +217,28 @@ function WatchlistCol() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {watchlist.map((coin, i) => {
-          const lp = livePrices[coin.symbol];
-          const price = lp?.price ?? coin.price;
+          const lp     = livePrices[coin.symbol];
+          const price  = lp?.price ?? coin.price;
           const change = lp?.change24h ?? coin.change24h;
-          const isUp = change >= 0;
+          const isUp   = change >= 0;
           const hasAlert = alerts[coin.symbol];
 
           return (
             <div key={i} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "9px 0",
+              padding: "8px 0",
               borderBottom: i < watchlist.length - 1 ? "1px solid rgba(31,31,46,0.5)" : "none"
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
-                <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+                <CoinIcon symbol={coin.symbol} size={24} fallbackColor="#A78BFA" />
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)", fontWeight: 600 }}>{coin.name}</div>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{coin.symbol}</div>
                 </div>
               </div>
-              <Sparkline data={coin.sparkData} width={52} height={22} />
-              <div style={{ textAlign: "right", marginLeft: 10, minWidth: 90 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
+              <Sparkline data={coin.sparkData} width={44} height={20} />
+              <div style={{ textAlign: "right", marginLeft: 8, minWidth: 82 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 }}>
                   <span
                     ref={el => { priceRefs.current[coin.symbol] = el; }}
                     style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)" }}
@@ -169,8 +257,11 @@ function WatchlistCol() {
                     {hasAlert ? <Bell size={10} /> : <BellOff size={10} />}
                   </button>
                 </div>
-                <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: isUp ? "var(--bull)" : "var(--bear)" }}>
-                  {isUp ? "+" : ""}{change.toFixed(1)}%
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3 }}>
+                  {isUp ? <TrendingUp size={8} style={{ color: "var(--bull)" }} /> : <TrendingDown size={8} style={{ color: "var(--bear)" }} />}
+                  <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: isUp ? "var(--bull)" : "var(--bear)" }}>
+                    {isUp ? "+" : ""}{change.toFixed(1)}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -179,18 +270,19 @@ function WatchlistCol() {
       </div>
 
       {/* Trending */}
-      <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
+      <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
         <span className="section-label" style={{ display: "block", marginBottom: 8 }}>🔥 TRENDING</span>
         {trending.map((t, i) => (
           <div key={i} style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0",
+            display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0",
             borderBottom: i < trending.length - 1 ? "1px solid rgba(31,31,46,0.3)" : "none"
           }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <CoinIcon symbol={t.symbol} size={14} fallbackColor="#A78BFA" />
               <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", fontWeight: 600 }}>{t.symbol}</span>
               <span style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-3)" }}>{t.name}</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--bull)", fontWeight: 600 }}>{t.change}</span>
               <ExternalLink size={9} style={{ color: "var(--text-3)" }} />
             </div>
@@ -210,7 +302,7 @@ function NewsCol() {
     fills?.forEach((fill, i) => {
       gsap.from(fill, {
         scaleX: 0, transformOrigin: "left", duration: 0.7, ease: "power2.out",
-        delay: 0.3 + i * 0.1,
+        delay: 0.3 + i * 0.08,
       });
     });
   }, []);
@@ -218,7 +310,6 @@ function NewsCol() {
   const sentimentLabel = (s: number) => s >= 65 ? "Bullish" : s < 40 ? "Bearish" : "Neutral";
   const sentimentColor = (s: number) => s >= 65 ? "var(--bull)" : s < 40 ? "var(--bear)" : "var(--accent)";
 
-  // Sentiment overview summary
   const avgSentiment = Math.round(news.reduce((s, n) => s + n.sentiment, 0) / news.length);
 
   return (
@@ -236,14 +327,13 @@ function NewsCol() {
       </div>
 
       {/* Aggregate sentiment bar */}
-      <div style={{ marginBottom: 14 }}>
+      <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", height: 3, borderRadius: 2, overflow: "hidden", gap: 1, marginBottom: 4 }}>
           {news.map((item, i) => (
             <div key={i} className="sentiment-fill" style={{
               flex: 1, height: "100%",
               background: sentimentColor(item.sentiment),
               opacity: 0.7,
-              width: `${item.sentiment}%`
             }} />
           ))}
         </div>
@@ -253,32 +343,30 @@ function NewsCol() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, overflowY: "auto", maxHeight: 280 }}>
         {news.map((item, i) => {
           const isExpanded = expanded === i;
           return (
-            <div key={i} style={{ cursor: "pointer" }} onClick={() => setExpanded(isExpanded ? null : i)}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+            <div key={i} style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setExpanded(isExpanded ? null : i)}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                 <span style={{ fontFamily: "var(--font-ui)", fontSize: 8, color: sentimentColor(item.sentiment), textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   {item.source}
                 </span>
                 <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)" }}>{item.time}</span>
               </div>
               <p style={{
-                fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-1)",
-                lineHeight: 1.5, marginBottom: 7,
+                fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)",
+                lineHeight: 1.5, marginBottom: 6,
                 display: "-webkit-box", WebkitLineClamp: isExpanded ? 99 : 2,
                 WebkitBoxOrient: "vertical", overflow: "hidden",
                 transition: "all 0.2s"
               }}>
                 {item.title}
               </p>
-              {/* Sentiment bar */}
-              <div style={{ height: 2, background: "var(--border)", borderRadius: 1, marginBottom: 6, overflow: "hidden" }}>
+              <div style={{ height: 2, background: "var(--border)", borderRadius: 1, marginBottom: 5, overflow: "hidden" }}>
                 <div className="sentiment-fill" style={{
                   width: `${item.sentiment}%`, height: "100%",
-                  background: sentimentColor(item.sentiment),
-                  borderRadius: 1
+                  background: sentimentColor(item.sentiment), borderRadius: 1
                 }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

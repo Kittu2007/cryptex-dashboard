@@ -22,30 +22,47 @@ export const portfolio = {
 };
 
 export const transactions = [
-  { type: "BUY"  as const, asset: "Bitcoin",   symbol: "BTC",  amount: 0.05, price: 64200, total: 3210,  date: "2h ago",  status: "Completed" as const },
-  { type: "SELL" as const, asset: "Ethereum",  symbol: "ETH",  amount: 1.2,  price: 3850,  total: 4620,  date: "1d ago",  status: "Completed" as const },
-  { type: "BUY"  as const, asset: "Solana",    symbol: "SOL",  amount: 10,   price: 185,   total: 1850,  date: "2d ago",  status: "Pending"   as const },
-  { type: "SELL" as const, asset: "BNB",       symbol: "BNB",  amount: 2.5,  price: 595,   total: 1487,  date: "3d ago",  status: "Completed" as const },
-  { type: "BUY"  as const, asset: "Chainlink", symbol: "LINK", amount: 50,   price: 17.8,  total: 890,   date: "5d ago",  status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Bitcoin",   symbol: "BTC",  amount: 0.05,  price: 64200, total: 3210,  date: "2h ago",   status: "Completed" as const },
+  { type: "SELL" as const, asset: "Ethereum",  symbol: "ETH",  amount: 1.2,   price: 3850,  total: 4620,  date: "5h ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Solana",    symbol: "SOL",  amount: 10,    price: 185,   total: 1850,  date: "1d ago",   status: "Pending"   as const },
+  { type: "SELL" as const, asset: "BNB",       symbol: "BNB",  amount: 2.5,   price: 595,   total: 1487,  date: "1d ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Chainlink", symbol: "LINK", amount: 50,    price: 17.8,  total: 890,   date: "2d ago",   status: "Completed" as const },
+  { type: "SELL" as const, asset: "Ethereum",  symbol: "ETH",  amount: 0.5,   price: 3920,  total: 1960,  date: "3d ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Cardano",   symbol: "ADA",  amount: 2000,  price: 0.58,  total: 1160,  date: "4d ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Polygon",   symbol: "MATIC",amount: 1000,  price: 0.88,  total: 880,   date: "5d ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Polkadot",  symbol: "DOT",  amount: 100,   price: 10.1,  total: 1010,  date: "6d ago",   status: "Completed" as const },
+  { type: "SELL" as const, asset: "Bitcoin",   symbol: "BTC",  amount: 0.02,  price: 65800, total: 1316,  date: "8d ago",   status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Avalanche", symbol: "AVAX", amount: 20,    price: 41.5,  total: 830,   date: "9d ago",   status: "Completed" as const },
+  { type: "SELL" as const, asset: "Chainlink", symbol: "LINK", amount: 30,    price: 18.2,  total: 546,   date: "10d ago",  status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Ethereum",  symbol: "ETH",  amount: 2,     price: 3780,  total: 7560,  date: "12d ago",  status: "Completed" as const },
+  { type: "SELL" as const, asset: "Solana",    symbol: "SOL",  amount: 25,    price: 176,   total: 4400,  date: "14d ago",  status: "Completed" as const },
+  { type: "BUY"  as const, asset: "Bitcoin",   symbol: "BTC",  amount: 0.1,   price: 62500, total: 6250,  date: "18d ago",  status: "Failed"    as const },
 ];
 
 export const watchlist = [
   { symbol: "BTC",  name: "Bitcoin",   price: 67432.50, change24h: 2.4,  sparkData: [62000, 63500, 64200, 63800, 65100, 66300, 67432] },
   { symbol: "ETH",  name: "Ethereum",  price: 3891.20,  change24h: 1.8,  sparkData: [3700, 3750, 3820, 3780, 3850, 3870, 3891] },
   { symbol: "SOL",  name: "Solana",    price: 182.40,   change24h: -0.6, sparkData: [190, 188, 185, 187, 184, 183, 182] },
+  { symbol: "BNB",  name: "BNB",       price: 601.20,   change24h: 3.1,  sparkData: [575, 582, 590, 586, 595, 598, 601] },
+  { symbol: "LINK", name: "Chainlink", price: 18.40,    change24h: 4.2,  sparkData: [16.2, 16.8, 17.4, 17.1, 17.9, 18.2, 18.4] },
   { symbol: "AVAX", name: "Avalanche", price: 42.80,    change24h: 5.2,  sparkData: [38, 39, 40, 39.5, 41, 42, 42.8] },
 ];
 
 export const trending = [
   { symbol: "INJ",  name: "Injective", change: "+18.4%" },
   { symbol: "TIA",  name: "Celestia",  change: "+12.1%" },
-  { symbol: "ONDO", name: "Ondo",      change: "+9.8%" },
+  { symbol: "ONDO", name: "Ondo",      change: "+9.8%"  },
+  { symbol: "WIF",  name: "dogwifhat", change: "+7.3%"  },
+  { symbol: "JUP",  name: "Jupiter",   change: "+6.1%"  },
 ];
 
 export const news = [
-  { source: "CoinDesk", category: "Markets",  title: "Bitcoin breaks $68K resistance as institutional demand surges ahead of halving", sentiment: 78, time: "2h ago" },
-  { source: "The Block", category: "Ethereum", title: "ETH staking yields compress as validator count hits new all-time high",            sentiment: 42, time: "4h ago" },
-  { source: "Decrypt",   category: "DeFi",     title: "Solana ecosystem records all-time DEX volume in Q1 2026, surpassing Ethereum",    sentiment: 65, time: "6h ago" },
+  { source: "CoinDesk",   category: "Markets",   title: "Bitcoin breaks $68K resistance as institutional demand surges ahead of halving",  sentiment: 78, time: "2h ago"  },
+  { source: "The Block",  category: "Ethereum",  title: "ETH staking yields compress as validator count hits new all-time high",           sentiment: 42, time: "4h ago"  },
+  { source: "Decrypt",    category: "DeFi",      title: "Solana ecosystem records all-time DEX volume in Q1 2026, surpassing Ethereum",   sentiment: 65, time: "6h ago"  },
+  { source: "Bloomberg",  category: "Macro",     title: "Fed signals rate cuts could accelerate crypto rally through H2 2026",            sentiment: 71, time: "9h ago"  },
+  { source: "Blockworks", category: "Regulation",title: "SEC approves spot Ethereum ETF options, opening $18B in institutional exposure", sentiment: 83, time: "12h ago" },
+  { source: "CoinTelegraph",category:"Altcoins", title: "Chainlink CCIP adoption hits 500 protocols — analyst targets $30 by Q3",        sentiment: 38, time: "1d ago"  },
 ];
 
 export const indicators = [
