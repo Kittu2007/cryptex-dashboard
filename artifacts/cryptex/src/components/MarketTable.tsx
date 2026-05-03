@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "./Sparkline";
 import { useApp } from "../context/AppContext";
@@ -31,10 +31,11 @@ export default function MarketTable() {
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("marketCap");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const { formatPrice } = useApp();
+  const priceRefs = useRef<Record<string, HTMLTableCellElement | null>>({});
+  const { formatPrice, livePrices } = useApp();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
+    const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,11 +43,27 @@ export default function MarketTable() {
     if (!loading && rowsRef.current) {
       const rows = rowsRef.current.querySelectorAll(".mkt-row");
       gsap.from(rows, {
-        opacity: 0, y: 8, stagger: 0.04, duration: 0.5, ease: "power2.out",
-        scrollTrigger: { trigger: tableRef.current, start: "top 85%" }
+        opacity: 0, y: 6, stagger: 0.04, duration: 0.45, ease: "power2.out",
+        delay: 0.05,
       });
     }
   }, [loading]);
+
+  // Flash price cells on live update
+  useEffect(() => {
+    if (loading) return;
+    for (const coin of coins) {
+      const lp = livePrices[coin.symbol];
+      if (!lp) continue;
+      const el = priceRefs.current[coin.symbol];
+      if (!el) continue;
+      const up = lp.price >= lp.prevPrice;
+      gsap.to(el, {
+        color: up ? "#34D399" : "#F87171", duration: 0.08,
+        onComplete: () => gsap.to(el, { color: "var(--text-1)", duration: 1.2 })
+      });
+    }
+  }, [livePrices, loading]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -54,10 +71,16 @@ export default function MarketTable() {
   }
 
   const sorted = [...coins].sort((a, b) => {
+    const lpa = livePrices[a.symbol];
+    const lpb = livePrices[b.symbol];
+    const aPrice = lpa?.price ?? a.price;
+    const bPrice = lpb?.price ?? b.price;
+    const aChange = lpa?.change24h ?? a.change24h;
+    const bChange = lpb?.change24h ?? b.change24h;
     const parseNum = (v: string) => parseFloat(v.replace(/[TBMK]/g, ""));
     let aVal: number, bVal: number;
-    if (sortKey === "price") { aVal = a.price; bVal = b.price; }
-    else if (sortKey === "change24h") { aVal = a.change24h; bVal = b.change24h; }
+    if (sortKey === "price") { aVal = aPrice; bVal = bPrice; }
+    else if (sortKey === "change24h") { aVal = aChange; bVal = bChange; }
     else if (sortKey === "change7d") { aVal = a.change7d; bVal = b.change7d; }
     else if (sortKey === "marketCap") { aVal = parseNum(a.marketCap); bVal = parseNum(b.marketCap); }
     else { aVal = parseNum(a.volume); bVal = parseNum(b.volume); }
@@ -76,21 +99,27 @@ export default function MarketTable() {
 
   const thStyle = (key?: SortKey): React.CSSProperties => ({
     fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
-    letterSpacing: "0.15em", textTransform: "uppercase" as const,
+    letterSpacing: "0.15em", textTransform: "uppercase",
     color: sortKey === key ? "var(--text-2)" : "var(--text-3)",
     padding: "10px 0", cursor: key ? "pointer" : "default",
-    userSelect: "none", whiteSpace: "nowrap" as const
+    userSelect: "none", whiteSpace: "nowrap"
   });
 
-  const SignalPill = ({ signal }: { signal: string }) => {
-    const isBull = signal === "Bullish", isBear = signal === "Bearish";
+  const SignalPill = ({ signal, change }: { signal: string; change: number }) => {
+    const isLiveBull = change > 1;
+    const isLiveBear = change < -1;
+    const resolved = isLiveBull ? "Bullish" : isLiveBear ? "Bearish" : signal === "Neutral" ? "Neutral" : signal;
+    const isBull = resolved === "Bullish", isBear = resolved === "Bearish";
     return (
-      <span style={{
-        fontFamily: "var(--font-ui)", fontSize: 9,
-        color: isBull ? "var(--bull)" : isBear ? "var(--bear)" : "var(--text-2)",
-        background: isBull ? "var(--bull-bg)" : isBear ? "var(--bear-bg)" : "transparent",
-        padding: "2px 6px", borderRadius: 3
-      }}>{signal}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        {isBull ? <TrendingUp size={9} style={{ color: "var(--bull)" }} /> : isBear ? <TrendingDown size={9} style={{ color: "var(--bear)" }} /> : null}
+        <span style={{
+          fontFamily: "var(--font-ui)", fontSize: 9,
+          color: isBull ? "var(--bull)" : isBear ? "var(--bear)" : "var(--text-2)",
+          background: isBull ? "var(--bull-bg)" : isBear ? "var(--bear-bg)" : "transparent",
+          padding: "2px 6px", borderRadius: 3
+        }}>{resolved}</span>
+      </div>
     );
   };
 
@@ -108,13 +137,13 @@ export default function MarketTable() {
               24H <SortIcon col="change24h" />
             </th>
             <th style={{ ...thStyle("change7d"), textAlign: "right" }} onClick={() => handleSort("change7d")}>
-              7D <SortIcon col="change7d" />
+              7D Chart <SortIcon col="change7d" />
             </th>
             <th style={{ ...thStyle("marketCap"), textAlign: "right" }} onClick={() => handleSort("marketCap")}>
               Mkt Cap <SortIcon col="marketCap" />
             </th>
             <th style={{ ...thStyle("volume"), textAlign: "right" }} onClick={() => handleSort("volume")}>
-              Vol <SortIcon col="volume" />
+              Volume <SortIcon col="volume" />
             </th>
             <th style={thStyle()} align="right">Signal</th>
           </tr>
@@ -123,16 +152,26 @@ export default function MarketTable() {
           {loading
             ? Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i} style={{ borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
-                  <td colSpan={8} style={{ padding: "10px 0" }}>
-                    <div className="skeleton" style={{ height: 14, borderRadius: 3 }} />
+                  <td colSpan={8} style={{ padding: "12px 0" }}>
+                    <div className="skeleton" style={{ height: 16, borderRadius: 3 }} />
                   </td>
                 </tr>
               ))
             : sorted.map((coin, i) => {
-                const is24Up = coin.change24h >= 0, is7Up = coin.change7d >= 0;
+                const lp = livePrices[coin.symbol];
+                const livePrice = lp?.price ?? coin.price;
+                const liveChange = lp?.change24h ?? coin.change24h;
+                const is24Up = liveChange >= 0;
+                const is7Up = coin.change7d >= 0;
                 return (
-                  <tr key={coin.id} className="mkt-row" style={{ borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
-                    <td style={{ padding: "10px 0 10px", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", paddingRight: 16 }}>
+                  <tr key={coin.id} className="mkt-row" style={{
+                    borderBottom: "1px solid rgba(31,31,46,0.4)",
+                    transition: "background 0.1s"
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <td style={{ padding: "10px 0", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", paddingRight: 16 }}>
                       {i + 1}
                     </td>
                     <td style={{ padding: "10px 16px 10px 0" }}>
@@ -152,15 +191,24 @@ export default function MarketTable() {
                         </div>
                       </div>
                     </td>
-                    <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", paddingRight: 16 }}>
-                      {formatPrice(coin.price)}
+                    <td
+                      ref={el => { priceRefs.current[coin.symbol] = el; }}
+                      align="right"
+                      style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", paddingRight: 16, transition: "color 0.15s" }}
+                    >
+                      {formatPrice(livePrice)}
                     </td>
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is24Up ? "var(--bull)" : "var(--bear)", paddingRight: 16 }}>
-                      {is24Up ? "+" : "−"}{Math.abs(coin.change24h).toFixed(1)}%
+                      <span style={{
+                        padding: "1px 5px", borderRadius: 3,
+                        background: is24Up ? "var(--bull-bg)" : "var(--bear-bg)"
+                      }}>
+                        {is24Up ? "+" : "−"}{Math.abs(liveChange).toFixed(1)}%
+                      </span>
                     </td>
                     <td align="right" style={{ paddingRight: 16 }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
-                        <Sparkline data={sparkData[coin.id]} width={44} height={20} />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
+                        <Sparkline data={sparkData[coin.id]} width={50} height={22} />
                         <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is7Up ? "var(--bull)" : "var(--bear)", minWidth: 42, textAlign: "right" }}>
                           {is7Up ? "+" : "−"}{Math.abs(coin.change7d).toFixed(1)}%
                         </span>
@@ -172,7 +220,7 @@ export default function MarketTable() {
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
                       ${coin.volume}
                     </td>
-                    <td align="right"><SignalPill signal={coin.signal} /></td>
+                    <td align="right"><SignalPill signal={coin.signal} change={liveChange} /></td>
                   </tr>
                 );
               })}

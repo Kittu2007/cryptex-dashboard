@@ -10,7 +10,7 @@ interface TopRibbonProps {
 
 export default function TopRibbon({ livePrice, priceChange }: TopRibbonProps) {
   const ribbonRef = useRef<HTMLDivElement>(null);
-  const { formatPrice, settings, liveMarket, livePrices } = useApp();
+  const { formatPrice, currencySymbol, settings, liveMarket, livePrices } = useApp();
   const btc = livePrices["BTC"];
 
   useEffect(() => {
@@ -18,17 +18,17 @@ export default function TopRibbon({ livePrice, priceChange }: TopRibbonProps) {
   }, []);
 
   const isUp = priceChange >= 0;
+  const displayPrice = btc?.price ?? livePrice;
+  const displayChange = btc?.change24h ?? priceChange;
+  const priceChangeAbs = Math.abs(displayChange * displayPrice * 0.01);
 
   const ribbonStats = [
     { label: "24H HIGH", value: formatPrice(liveMarket.high24h) },
-    { label: "24H LOW", value: formatPrice(liveMarket.low24h) },
-    { label: "24H VOL", value: `${settings.currencySymbol ?? "$"}${(liveMarket.volume24h * (settings.currency === "USD" ? 1 : 1)).toFixed(1)}B` },
-    { label: "MKT CAP", value: `${settings.currencySymbol ?? "$"}${liveMarket.marketCap.toFixed(2)}T` },
+    { label: "24H LOW",  value: formatPrice(liveMarket.low24h) },
+    { label: "24H VOL",  value: `${currencySymbol}${liveMarket.volume24h.toFixed(1)}B` },
+    { label: "MKT CAP",  value: `${currencySymbol}${liveMarket.marketCap.toFixed(2)}T` },
     { label: "DOMINANCE", value: `${liveMarket.btcDominance.toFixed(1)}%` },
   ];
-
-  // Pull live BTC price for the main display
-  const displayPrice = btc ? btc.price : livePrice;
 
   return (
     <div className="top-ribbon" ref={ribbonRef} style={{ paddingLeft: 20, paddingRight: 16, gap: 0 }}>
@@ -56,8 +56,8 @@ export default function TopRibbon({ livePrice, priceChange }: TopRibbonProps) {
           background: isUp ? "var(--bull-bg)" : "var(--bear-bg)",
           padding: "2px 6px", borderRadius: 4
         }}>
-          {isUp ? "+" : ""}{btc?.change24h.toFixed(1) ?? priceChange.toFixed(1)}%
-          {" "}({isUp ? "+" : ""}{formatPrice(Math.abs((btc?.change24h ?? priceChange) * 674))})
+          {displayChange >= 0 ? "+" : ""}{displayChange.toFixed(1)}%
+          {" "}({displayChange >= 0 ? "+" : "−"}{formatPrice(priceChangeAbs)})
         </span>
 
         {!settings.autoRefresh && (
@@ -68,7 +68,7 @@ export default function TopRibbon({ livePrice, priceChange }: TopRibbonProps) {
         )}
       </div>
 
-      <div className="ribbon-mid" style={{ display: "flex", alignItems: "center", gap: 0, marginLeft: 16, flex: 1 }}>
+      <div className="ribbon-mid" style={{ display: "flex", alignItems: "center", marginLeft: 16, flex: 1 }}>
         {ribbonStats.map((stat, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center" }}>
             {i > 0 && <div className="v-divider" style={{ margin: "0 16px" }} />}

@@ -25,7 +25,10 @@ const INITIAL_CHANGE = 2.4;
 function DashboardMain({ livePrice, priceChange }: { livePrice: number; priceChange: number }) {
   return (
     <>
-      <div className="hero-row" style={{ display: "flex", borderBottom: "1px solid var(--border)" }}>
+      <div className="hero-row" style={{
+        display: "flex", borderBottom: "1px solid var(--border)",
+        height: 460, minHeight: 0, overflow: "hidden"
+      }}>
         <ChartPanel livePrice={livePrice} priceChange={priceChange} />
         <RightPanel />
       </div>

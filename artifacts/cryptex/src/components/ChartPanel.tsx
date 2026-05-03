@@ -40,7 +40,7 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
 
     const chart = createChart(chartRef.current, {
       width: chartRef.current.clientWidth,
-      height: 280,
+      height: 240,
       layout: {
         background: { type: ColorType.Solid, color: isDark ? "#0A0A0E" : "#F8F8FC" },
         textColor: isDark ? "#38364A" : "#A09CB8",
@@ -55,8 +55,8 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
         vertLine: { color: "#2A2A40", labelBackgroundColor: isDark ? "#1A1A24" : "#F0F0F8" },
         horzLine: { color: "#2A2A40", labelBackgroundColor: isDark ? "#1A1A24" : "#F0F0F8" },
       },
-      rightPriceScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0", textColor: isDark ? "#38364A" : "#A09CB8" },
-      timeScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0", textColor: isDark ? "#38364A" : "#A09CB8" },
+      rightPriceScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0" },
+      timeScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0" },
       handleScroll: true,
       handleScale: true,
     });

@@ -207,10 +207,10 @@ function NewsCol() {
 
   useEffect(() => {
     const fills = newsRef.current?.querySelectorAll(".sentiment-fill");
-    fills?.forEach(fill => {
+    fills?.forEach((fill, i) => {
       gsap.from(fill, {
         scaleX: 0, transformOrigin: "left", duration: 0.7, ease: "power2.out",
-        scrollTrigger: { trigger: newsRef.current, start: "top 85%", once: true }
+        delay: 0.3 + i * 0.1,
       });
     });
   }, []);
@@ -304,8 +304,7 @@ export default function BottomSection() {
 
   useEffect(() => {
     gsap.from(sectionRef.current, {
-      y: 30, opacity: 0, duration: 0.7, ease: "power2.out",
-      scrollTrigger: { trigger: sectionRef.current, start: "top 85%", once: true }
+      y: 20, opacity: 0, duration: 0.6, ease: "power2.out", delay: 0.2
     });
   }, []);
 
