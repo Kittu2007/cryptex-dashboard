@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
-import { createChart, ColorType, CandlestickSeries, HistogramSeries, LineSeries, AreaSeries, BarSeries } from "lightweight-charts";
-import { BarChart2, TrendingUp, AlignLeft, AreaChart } from "lucide-react";
-import { generateCandles, coinTabs, timeRanges, indicators } from "../mockData";
+import {
+  createChart, ColorType,
+  CandlestickSeries, HistogramSeries, LineSeries, AreaSeries, BarSeries,
+} from "lightweight-charts";
+import { BarChart2, TrendingUp, AlignLeft, AreaChart, Activity } from "lucide-react";
+import {
+  generateCandles, computeMA, coinTabs, timeRanges,
+  COIN_BASE_PRICES, COIN_META,
+} from "../mockData";
 import { useApp } from "../context/AppContext";
 
 interface ChartPanelProps {
@@ -10,185 +16,329 @@ interface ChartPanelProps {
   priceChange: number;
 }
 
-const BASE_PRICES: Record<string, number> = {
-  BTC: 60000, ETH: 3500, SOL: 160, BNB: 560, MATIC: 0.8
-};
+type ChartType = "Candlestick" | "Line" | "Bar" | "Area";
+
+const CHART_BUTTONS: { type: ChartType; icon: React.ElementType; label: string }[] = [
+  { type: "Candlestick", icon: BarChart2,  label: "Candle" },
+  { type: "Line",        icon: TrendingUp, label: "Line"   },
+  { type: "Area",        icon: AreaChart,  label: "Area"   },
+  { type: "Bar",         icon: AlignLeft,  label: "Bar"    },
+];
 
 export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) {
-  const chartRef = useRef<HTMLDivElement>(null);
-  const priceRef = useRef<HTMLDivElement>(null);
-  const [activeCoin, setActiveCoin] = useState("BTC");
-  const [activeRange, setActiveRange] = useState("1D");
-  const { settings, formatPrice } = useApp();
-  const [activeChartType, setActiveChartType] = useState(settings.chartType);
+  const chartRef    = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const chartInstRef = useRef<ReturnType<typeof createChart> | null>(null);
 
-  // Sync chart type when global default changes
+  const [activeCoin,      setActiveCoin]      = useState("BTC");
+  const [activeRange,     setActiveRange]     = useState("1D");
+  const [activeChartType, setActiveChartType] = useState<ChartType>("Candlestick");
+  const [maValues,        setMaValues]        = useState({ ma7: 0, ma25: 0, ma99: 0 });
+  const [coinPrice,       setCoinPrice]       = useState(COIN_BASE_PRICES["BTC"]);
+  const [coinChange,      setCoinChange]      = useState(2.4);
+
+  const { settings, formatPrice, livePrices } = useApp();
+
+  // Sync chart type when Settings default changes
   useEffect(() => {
-    setActiveChartType(settings.chartType);
+    setActiveChartType(settings.chartType as ChartType);
   }, [settings.chartType]);
 
+  // Update displayed price whenever coin or livePrices changes
   useEffect(() => {
-    gsap.from(priceRef.current, { y: 20, opacity: 0, duration: 0.9, ease: "expo.out", delay: 0.5 });
-    gsap.from(chartRef.current, { opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.6 });
-  }, []);
+    const lp = livePrices[activeCoin];
+    if (lp) {
+      setCoinPrice(lp.price);
+      setCoinChange(lp.change24h);
+    } else {
+      setCoinPrice(COIN_BASE_PRICES[activeCoin] ?? 60000);
+      const coin = coinTabs.indexOf(activeCoin);
+      setCoinChange([2.4, 1.8, -0.6, 3.1, -1.2][coin] ?? 0);
+    }
+  }, [activeCoin, livePrices]);
 
-  useEffect(() => {
+  // Build / rebuild the chart
+  const buildChart = useCallback(() => {
     if (!chartRef.current) return;
+
+    // Destroy previous instance
+    if (chartInstRef.current) {
+      try { chartInstRef.current.remove(); } catch { /* already removed */ }
+      chartInstRef.current = null;
+    }
     chartRef.current.innerHTML = "";
 
     const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+    const h = chartRef.current.clientHeight || 220;
 
     const chart = createChart(chartRef.current, {
       width: chartRef.current.clientWidth,
-      height: 240,
+      height: h,
       layout: {
         background: { type: ColorType.Solid, color: isDark ? "#0A0A0E" : "#F8F8FC" },
-        textColor: isDark ? "#38364A" : "#A09CB8",
+        textColor:  isDark ? "#4A4860" : "#A09CB8",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 10,
       },
       grid: {
-        vertLines: { color: isDark ? "#13131A" : "#EDEDF5" },
-        horzLines: { color: isDark ? "#13131A" : "#EDEDF5" },
+        vertLines: { color: isDark ? "#111118" : "#EBEBF5" },
+        horzLines: { color: isDark ? "#111118" : "#EBEBF5" },
       },
       crosshair: {
-        vertLine: { color: "#2A2A40", labelBackgroundColor: isDark ? "#1A1A24" : "#F0F0F8" },
-        horzLine: { color: "#2A2A40", labelBackgroundColor: isDark ? "#1A1A24" : "#F0F0F8" },
+        vertLine: { color: "#3A3860", labelBackgroundColor: isDark ? "#1A1A28" : "#EEEEF8" },
+        horzLine: { color: "#3A3860", labelBackgroundColor: isDark ? "#1A1A28" : "#EEEEF8" },
       },
       rightPriceScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0" },
-      timeScale: { borderColor: isDark ? "#1F1F2E" : "#E0DFF0" },
+      timeScale: {
+        borderColor: isDark ? "#1F1F2E" : "#E0DFF0",
+        timeVisible: true,
+        secondsVisible: false,
+      },
       handleScroll: true,
       handleScale: true,
     });
+    chartInstRef.current = chart;
 
-    const candles = generateCandles(180, BASE_PRICES[activeCoin] ?? 60000);
+    const candles = generateCandles(activeCoin, activeRange);
 
-    const type = activeChartType;
-    if (type === "Candlestick" || type === "Bar") {
-      if (type === "Bar") {
-        const series = chart.addSeries(BarSeries, {
-          upColor: "#34D399",
-          downColor: "#F87171",
-        });
-        series.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
-      } else {
-        const series = chart.addSeries(CandlestickSeries, {
-          upColor: "#34D399", downColor: "#F87171",
-          borderUpColor: "#34D399", borderDownColor: "#F87171",
-          wickUpColor: "#34D399", wickDownColor: "#F87171",
-        });
-        series.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
-      }
-    } else if (type === "Line") {
-      const series = chart.addSeries(LineSeries, {
-        color: "#A78BFA", lineWidth: 2,
-        priceLineColor: "#A78BFA",
+    // Compute MAs and update display
+    const ma7  = computeMA(candles, 7);
+    const ma25 = computeMA(candles, 25);
+    const ma99 = computeMA(candles, 99);
+    setMaValues({ ma7, ma25, ma99 });
+
+    // Add price series based on chart type
+    if (activeChartType === "Candlestick") {
+      const s = chart.addSeries(CandlestickSeries, {
+        upColor: "#34D399", downColor: "#F87171",
+        borderUpColor: "#34D399", borderDownColor: "#F87171",
+        wickUpColor: "#34D399", wickDownColor: "#F87171",
       });
-      series.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
-    } else if (type === "Area") {
-      const series = chart.addSeries(AreaSeries, {
+      s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
+    } else if (activeChartType === "Bar") {
+      const s = chart.addSeries(BarSeries, { upColor: "#34D399", downColor: "#F87171" });
+      s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
+    } else if (activeChartType === "Line") {
+      const s = chart.addSeries(LineSeries, { color: "#A78BFA", lineWidth: 2 });
+      s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
+    } else if (activeChartType === "Area") {
+      const s = chart.addSeries(AreaSeries, {
         lineColor: "#A78BFA", lineWidth: 2,
-        topColor: "rgba(167,139,250,0.3)",
-        bottomColor: "rgba(167,139,250,0.02)",
+        topColor: "rgba(167,139,250,0.25)", bottomColor: "rgba(167,139,250,0.01)",
       });
-      series.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
+      s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
     }
 
-    const volSeries = chart.addSeries(HistogramSeries, {
+    // Volume histogram
+    const vol = chart.addSeries(HistogramSeries, {
       color: "rgba(52,211,153,0.3)",
       priceFormat: { type: "volume" },
       priceScaleId: "vol",
     });
-    chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
-    volSeries.setData(candles.map(c => ({
+    chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+    vol.setData(candles.map(c => ({
       time: c.time as any, value: c.value,
-      color: c.close >= c.open ? "rgba(52,211,153,0.3)" : "rgba(248,113,113,0.3)"
+      color: c.close >= c.open ? "rgba(52,211,153,0.28)" : "rgba(248,113,113,0.28)",
     })));
 
     chart.timeScale().fitContent();
 
-    const observer = new ResizeObserver(() => {
-      if (chartRef.current) chart.applyOptions({ width: chartRef.current.clientWidth });
+    // Responsive width
+    const ro = new ResizeObserver(() => {
+      if (chartRef.current && chartInstRef.current) {
+        chartInstRef.current.applyOptions({ width: chartRef.current.clientWidth });
+      }
     });
-    if (chartRef.current) observer.observe(chartRef.current);
-    return () => { chart.remove(); observer.disconnect(); };
+    chartRef.current && ro.observe(chartRef.current);
+
+    return () => { ro.disconnect(); };
   }, [activeCoin, activeRange, activeChartType, settings.theme]);
 
-  const isUp = priceChange >= 0;
-  const maColors = ["#EAB308", "#6B7280", "#60A5FA"];
+  useEffect(() => {
+    const cleanup = buildChart();
+    return () => {
+      cleanup?.();
+      if (chartInstRef.current) {
+        try { chartInstRef.current.remove(); } catch { /* */ }
+        chartInstRef.current = null;
+      }
+    };
+  }, [buildChart]);
 
-  const chartButtons = [
-    { type: "Line" as const, icon: TrendingUp, label: "Line" },
-    { type: "Area" as const, icon: AreaChart, label: "Area" },
-    { type: "Candlestick" as const, icon: BarChart2, label: "Candle" },
-    { type: "Bar" as const, icon: AlignLeft, label: "Bar" },
-  ];
+  // Animate coin switch — flash price
+  const priceEl = useRef<HTMLSpanElement>(null);
+  const prevCoin = useRef(activeCoin);
+  useEffect(() => {
+    if (prevCoin.current !== activeCoin && priceEl.current) {
+      prevCoin.current = activeCoin;
+      gsap.fromTo(priceEl.current,
+        { opacity: 0.3, y: 6 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  }, [activeCoin, coinPrice]);
+
+  const isUp   = coinChange >= 0;
+  const meta   = COIN_META[activeCoin] ?? { name: activeCoin };
+  const maColors = ["#EAB308", "#6B7280", "#60A5FA"];
+  const fmtMA = (v: number) => v > 0
+    ? v < 1 ? v.toFixed(4) : v.toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : "—";
 
   return (
-    <div style={{ padding: "20px 24px 0", flex: 1 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <div style={{ display: "flex", gap: 20 }}>
-          {coinTabs.map(coin => (
-            <button key={coin} onClick={() => setActiveCoin(coin)} className="coin-tab" style={{
-              background: "none", border: "none", cursor: "pointer",
-              fontFamily: "var(--font-ui)", fontSize: 12,
-              color: activeCoin === coin ? "var(--text-1)" : "var(--text-2)",
-              borderBottom: activeCoin === coin ? "2px solid var(--accent)" : "2px solid transparent",
-              paddingBottom: 4, paddingLeft: 0, paddingRight: 0
-            }}>{coin}</button>
-          ))}
+    <div ref={containerRef} style={{
+      display: "flex", flexDirection: "column",
+      flex: 1, minWidth: 0, height: "100%", overflow: "hidden",
+    }}>
+      {/* ── Top control bar ── */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 20px 0",
+        borderBottom: "1px solid var(--border)",
+        flexShrink: 0,
+      }}>
+        {/* Coin tabs */}
+        <div style={{ display: "flex", gap: 0 }}>
+          {coinTabs.map(coin => {
+            const lp   = livePrices[coin];
+            const p    = lp?.price ?? COIN_BASE_PRICES[coin] ?? 0;
+            const chg  = lp?.change24h ?? 0;
+            const active = activeCoin === coin;
+            return (
+              <button key={coin} onClick={() => setActiveCoin(coin)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                padding: "0 14px 10px",
+                borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+                marginBottom: -1,
+                textAlign: "left",
+              }}>
+                <div style={{
+                  fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600,
+                  color: active ? "var(--text-1)" : "var(--text-2)",
+                  marginBottom: 1,
+                }}>{coin}</div>
+                <div style={{
+                  fontFamily: "var(--font-data)", fontSize: 9,
+                  color: chg >= 0 ? "var(--bull)" : "var(--bear)",
+                  opacity: active ? 1 : 0.6,
+                }}>
+                  {chg >= 0 ? "+" : ""}{chg.toFixed(1)}%
+                </div>
+              </button>
+            );
+          })}
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 2 }}>
+
+        {/* Right controls: time ranges + chart type */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 10 }}>
+          {/* Time ranges */}
+          <div style={{
+            display: "flex", gap: 1,
+            background: "var(--bg-raised)", borderRadius: 5, padding: 2,
+          }}>
             {timeRanges.map(r => (
-              <button key={r} onClick={() => setActiveRange(r)} className="range-tab" style={{
-                background: activeRange === r ? "var(--bg-raised)" : "none",
-                border: "none", cursor: "pointer",
+              <button key={r} onClick={() => setActiveRange(r)} style={{
+                background: activeRange === r ? "var(--bg-surface)" : "none",
+                border: activeRange === r ? "1px solid var(--border-2)" : "1px solid transparent",
+                borderRadius: 4, cursor: "pointer",
                 fontFamily: "var(--font-data)", fontSize: 10,
-                color: activeRange === r ? "var(--text-1)" : "var(--text-2)",
-                borderRadius: 4, padding: "3px 8px"
+                color: activeRange === r ? "var(--accent)" : "var(--text-3)",
+                padding: "3px 9px", transition: "all 0.12s",
+                fontWeight: activeRange === r ? 600 : 400,
               }}>{r}</button>
             ))}
           </div>
-          <div className="v-divider" />
-          {chartButtons.map(({ type, icon: Icon, label }) => (
-            <button key={type} onClick={() => setActiveChartType(type)} title={label} style={{
-              width: 28, height: 28,
-              background: activeChartType === type ? "var(--bg-raised)" : "none",
-              border: activeChartType === type ? "1px solid var(--border-2)" : "1px solid transparent",
-              borderRadius: 4, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: activeChartType === type ? "var(--text-1)" : "var(--text-3)"
-            }}><Icon size={13} /></button>
+
+          <div style={{ width: 1, height: 18, background: "var(--border)" }} />
+
+          {/* Chart type */}
+          <div style={{ display: "flex", gap: 1, background: "var(--bg-raised)", borderRadius: 5, padding: 2 }}>
+            {CHART_BUTTONS.map(({ type, icon: Icon, label }) => (
+              <button key={type} onClick={() => setActiveChartType(type)} title={label} style={{
+                width: 28, height: 26,
+                background: activeChartType === type ? "var(--bg-surface)" : "none",
+                border: activeChartType === type ? "1px solid var(--border-2)" : "1px solid transparent",
+                borderRadius: 4, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: activeChartType === type ? "var(--accent)" : "var(--text-3)",
+                transition: "all 0.12s",
+              }}><Icon size={12} /></button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Price display ── */}
+      <div style={{ padding: "8px 20px 6px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <span ref={priceEl} style={{
+            fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 700,
+            color: "var(--text-1)", lineHeight: 1,
+          }}>
+            {formatPrice(coinPrice)}
+          </span>
+          <span style={{
+            fontFamily: "var(--font-data)", fontSize: 12,
+            color: isUp ? "var(--bull)" : "var(--bear)",
+          }}>
+            {isUp ? "+" : "−"}{formatPrice(Math.abs(coinChange * coinPrice * 0.01))}
+          </span>
+          <span style={{
+            fontFamily: "var(--font-data)", fontSize: 11,
+            color: isUp ? "var(--bull)" : "var(--bear)",
+            background: isUp ? "var(--bull-bg)" : "var(--bear-bg)",
+            padding: "1px 6px", borderRadius: 3,
+          }}>
+            {isUp ? "+" : ""}{coinChange.toFixed(2)}%
+          </span>
+          <span style={{
+            fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)",
+            marginLeft: 4,
+          }}>{meta.name} · {activeRange}</span>
+        </div>
+
+        {/* MA values computed from chart data */}
+        <div style={{ display: "flex", gap: 14, marginTop: 4 }}>
+          {[
+            { label: "MA(7)",  val: maValues.ma7,  color: maColors[0] },
+            { label: "MA(25)", val: maValues.ma25, color: maColors[1] },
+            { label: "MA(99)", val: maValues.ma99, color: maColors[2] },
+          ].map(({ label, val, color }) => (
+            <span key={label} style={{ fontFamily: "var(--font-data)", fontSize: 9, color }}>
+              {label} {fmtMA(val)}
+            </span>
           ))}
         </div>
       </div>
 
-      <div ref={priceRef} style={{ marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 36, fontWeight: 600, color: "var(--text-1)" }}>
-            {formatPrice(livePrice)}
-          </span>
-          <span style={{ fontFamily: "var(--font-data)", fontSize: 13, color: isUp ? "var(--bull)" : "var(--bear)" }}>
-            {isUp ? "+" : ""}${Math.abs(priceChange * 673).toFixed(2)} · {isUp ? "+" : ""}{priceChange.toFixed(1)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: 16, marginTop: 6 }}>
-          {["MA(7) 65,820", "MA(25) 64,102", "MA(99) 61,440"].map((ma, i) => (
-            <span key={i} style={{ fontFamily: "var(--font-data)", fontSize: 9, color: maColors[i] }}>{ma}</span>
-          ))}
-        </div>
-      </div>
-
-      <div ref={chartRef} className="chart-container chart-area" style={{
-        background: "var(--chart-bg)", borderRadius: "4px 4px 0 0", overflow: "hidden"
+      {/* ── Chart ── */}
+      <div ref={chartRef} style={{
+        flex: 1, minHeight: 0,
+        background: "var(--chart-bg)",
+        overflow: "hidden",
       }} />
 
-      <div style={{ display: "flex", gap: 24, padding: "10px 0", borderTop: "1px solid var(--border)", flexWrap: "wrap" }}>
-        {indicators.map((ind, i) => (
+      {/* ── Indicator strip ── */}
+      <div style={{
+        display: "flex", gap: 20, flexWrap: "wrap",
+        padding: "7px 20px",
+        borderTop: "1px solid var(--border)",
+        flexShrink: 0,
+      }}>
+        {[
+          { label: "RSI(14)",    value: "62.4",      color: "var(--accent)" },
+          { label: "MACD",       value: "+124.8",    color: "var(--bull)" },
+          { label: "BBands",     value: fmtMA(maValues.ma25 * 1.02), color: "var(--text-1)" },
+          { label: "ATR(14)",    value: (coinPrice * 0.018).toFixed(coinPrice < 10 ? 4 : 0), color: "var(--text-1)" },
+          { label: "Fear/Greed", value: "72 Greed",  color: "#EAB308" },
+          { label: "Vol",        value: activeRange === "1D" ? "38.2B" : activeRange === "1W" ? "267B" : "12.4B", color: "var(--text-2)" },
+        ].map((ind, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <span className="section-label">{ind.label}</span>
-            <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)" }}>{ind.value}</span>
+            <span style={{
+              fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)"
+            }}>{ind.label}</span>
+            <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: ind.color }}>{ind.value}</span>
           </div>
         ))}
       </div>

@@ -26,7 +26,9 @@ function PortfolioChart() {
       timeScale: { borderColor: "#1F1F2E" },
       handleScroll: true, handleScale: true,
     });
-    const candles = generateCandles(90, 31000);
+    // Map portfolio range to coin+timeRange format
+    const rangeMap: Record<string, string> = { "1W": "1W", "1M": "1M", "3M": "1M", "6M": "1M", "1Y": "1M", "All": "1M" };
+    const candles = generateCandles("BTC", rangeMap[range] ?? "1M");
     const series = chart.addSeries(AreaSeries, {
       lineColor: "#A78BFA", topColor: "rgba(167,139,250,0.2)", bottomColor: "rgba(167,139,250,0)",
       lineWidth: 2, priceLineColor: "#A78BFA",
