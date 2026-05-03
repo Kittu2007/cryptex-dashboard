@@ -228,3 +228,118 @@ export function computeIndicators(
 
 export const coinTabs = ["BTC", "ETH", "SOL", "BNB", "MATIC"];
 export const timeRanges = ["15m", "1h", "4h", "1D", "1W", "1M"];
+
+// ── Chart series helpers ──────────────────────────────────────────────────────
+
+type C = { time: number; open: number; high: number; low: number; close: number; value: number };
+
+export function smaSeries(candles: C[], period: number): { time: number; value: number }[] {
+  const out: { time: number; value: number }[] = [];
+  for (let i = period - 1; i < candles.length; i++) {
+    let s = 0;
+    for (let j = i - period + 1; j <= i; j++) s += candles[j].close;
+    out.push({ time: candles[i].time, value: s / period });
+  }
+  return out;
+}
+
+export function emaSeries(candles: C[], period: number): { time: number; value: number }[] {
+  if (candles.length < period) return [];
+  const k = 2 / (period + 1);
+  let ema = candles.slice(0, period).reduce((s, c) => s + c.close, 0) / period;
+  const out = [{ time: candles[period - 1].time, value: ema }];
+  for (let i = period; i < candles.length; i++) {
+    ema = candles[i].close * k + ema * (1 - k);
+    out.push({ time: candles[i].time, value: ema });
+  }
+  return out;
+}
+
+export function bbSeries(
+  candles: C[], period = 20, mult = 2
+): { time: number; upper: number; mid: number; lower: number }[] {
+  const out: { time: number; upper: number; mid: number; lower: number }[] = [];
+  for (let i = period - 1; i < candles.length; i++) {
+    let s = 0;
+    for (let j = i - period + 1; j <= i; j++) s += candles[j].close;
+    const mid = s / period;
+    let v = 0;
+    for (let j = i - period + 1; j <= i; j++) v += (candles[j].close - mid) ** 2;
+    const std = Math.sqrt(v / period);
+    out.push({ time: candles[i].time, upper: mid + mult * std, mid, lower: mid - mult * std });
+  }
+  return out;
+}
+
+export function vwapSeries(candles: C[]): { time: number; value: number }[] {
+  let cumPV = 0, cumV = 0;
+  return candles.map(c => {
+    const tp = (c.high + c.low + c.close) / 3;
+    cumPV += tp * c.value;
+    cumV  += c.value;
+    return { time: c.time, value: cumV > 0 ? cumPV / cumV : c.close };
+  });
+}
+
+export function rsiSeries(candles: C[], period = 14): { time: number; value: number }[] {
+  if (candles.length < period + 1) return [];
+  let avgGain = 0, avgLoss = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = candles[i].close - candles[i - 1].close;
+    if (d > 0) avgGain += d; else avgLoss += Math.abs(d);
+  }
+  avgGain /= period; avgLoss /= period;
+  const toRSI = (g: number, l: number) => l === 0 ? 100 : parseFloat((100 - 100 / (1 + g / l)).toFixed(2));
+  const out = [{ time: candles[period].time, value: toRSI(avgGain, avgLoss) }];
+  for (let i = period + 1; i < candles.length; i++) {
+    const d = candles[i].close - candles[i - 1].close;
+    avgGain = (avgGain * (period - 1) + (d > 0 ? d : 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + (d < 0 ? Math.abs(d) : 0)) / period;
+    out.push({ time: candles[i].time, value: toRSI(avgGain, avgLoss) });
+  }
+  return out;
+}
+
+export function macdSeries(candles: C[], fast = 12, slow = 26, sig = 9) {
+  if (candles.length < slow + sig) return { line: [] as {time:number;value:number}[], signalLine: [] as {time:number;value:number}[], hist: [] as {time:number;value:number;color:string}[] };
+  const kf = 2 / (fast + 1), ks = 2 / (slow + 1);
+  let ef = candles.slice(0, fast).reduce((s, c) => s + c.close, 0) / fast;
+  let es = candles.slice(0, slow).reduce((s, c) => s + c.close, 0) / slow;
+  // Advance fast EMA to bar slow-2
+  for (let i = fast; i < slow - 1; i++) ef = candles[i].close * kf + ef * (1 - kf);
+  const line: { time: number; value: number }[] = [];
+  for (let i = slow - 1; i < candles.length; i++) {
+    ef = candles[i].close * kf + ef * (1 - kf);
+    if (i > slow - 1) es = candles[i].close * ks + es * (1 - ks);
+    line.push({ time: candles[i].time, value: parseFloat((ef - es).toFixed(4)) });
+  }
+  if (line.length < sig) return { line, signalLine: [], hist: [] };
+  const ksig = 2 / (sig + 1);
+  let sigEma = line.slice(0, sig).reduce((s, m) => s + m.value, 0) / sig;
+  const signalLine: { time: number; value: number }[] = [];
+  const hist: { time: number; value: number; color: string }[] = [];
+  for (let i = sig - 1; i < line.length; i++) {
+    if (i > sig - 1) sigEma = line[i].value * ksig + sigEma * (1 - ksig);
+    const h = line[i].value - sigEma;
+    signalLine.push({ time: line[i].time, value: parseFloat(sigEma.toFixed(4)) });
+    hist.push({ time: line[i].time, value: parseFloat(h.toFixed(4)), color: h >= 0 ? "rgba(52,211,153,0.75)" : "rgba(248,113,113,0.75)" });
+  }
+  return { line, signalLine, hist };
+}
+
+export function stochSeries(candles: C[], kPeriod = 14, dPeriod = 3) {
+  const kLine: { time: number; value: number }[] = [];
+  for (let i = kPeriod - 1; i < candles.length; i++) {
+    const sl = candles.slice(i - kPeriod + 1, i + 1);
+    const hi = Math.max(...sl.map(c => c.high));
+    const lo = Math.min(...sl.map(c => c.low));
+    const k  = hi === lo ? 50 : ((candles[i].close - lo) / (hi - lo)) * 100;
+    kLine.push({ time: candles[i].time, value: parseFloat(k.toFixed(2)) });
+  }
+  const dLine: { time: number; value: number }[] = [];
+  for (let i = dPeriod - 1; i < kLine.length; i++) {
+    const s = kLine.slice(i - dPeriod + 1, i + 1).reduce((a, v) => a + v.value, 0);
+    dLine.push({ time: kLine[i].time, value: parseFloat((s / dPeriod).toFixed(2)) });
+  }
+  return { k: kLine, d: dLine };
+}

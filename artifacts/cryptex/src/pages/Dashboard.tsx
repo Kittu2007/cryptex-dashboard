@@ -27,10 +27,12 @@ function DashboardMain({ livePrice, priceChange }: { livePrice: number; priceCha
     <>
       <div className="hero-row" style={{
         display: "flex", borderBottom: "1px solid var(--border)",
-        height: 460, minHeight: 0, overflow: "hidden"
+        alignItems: "stretch",
       }}>
         <ChartPanel livePrice={livePrice} priceChange={priceChange} />
-        <RightPanel />
+        <div style={{ width: 285, flexShrink: 0, height: 460, overflowY: "auto", borderLeft: "1px solid var(--border)" }}>
+          <RightPanel />
+        </div>
       </div>
       <div className="section">
         <div style={{ padding: "14px 24px 10px", borderBottom: "1px solid var(--border)" }}>
