@@ -191,7 +191,7 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: #7B78A0;
 }
 
 /* Sentiment bar */

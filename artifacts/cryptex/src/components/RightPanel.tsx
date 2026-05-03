@@ -26,39 +26,38 @@ const HOLD_COLORS = {
 function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSize = 18 }: {
   value: number; prefix?: string; suffix?: string; decimals?: number; fontSize?: number;
 }) {
-  const elRef    = useRef<HTMLSpanElement>(null);
-  const flashRef = useRef<HTMLSpanElement>(null);
-  const prevRef  = useRef(value);
+  const elRef   = useRef<HTMLSpanElement>(null);
+  const prevRef = useRef(value);
 
   useEffect(() => {
     const prev = prevRef.current;
     prevRef.current = value;
     if (!elRef.current || Math.abs(value - prev) < 0.0001) return;
     const isUp = value >= prev;
-    gsap.to({ v: prev }, {
+
+    // Flash the span's own color then roll back to text-1
+    gsap.fromTo(elRef.current,
+      { color: isUp ? "#34D399" : "#F87171" },
+      { color: "var(--text-1)", duration: 0.9, ease: "power2.out" }
+    );
+    // Count up / down to new value
+    const obj = { v: prev };
+    gsap.to(obj, {
       v: value, duration: 0.65, ease: "power2.out",
-      onUpdate: function () {
+      onUpdate: () => {
         if (elRef.current)
-          elRef.current.textContent = prefix + (this.targets()[0].v as number).toFixed(decimals) + suffix;
+          elRef.current.textContent = prefix + obj.v.toFixed(decimals) + suffix;
       },
     });
-    if (flashRef.current) {
-      gsap.fromTo(flashRef.current,
-        { opacity: 0.85, color: isUp ? "#34D399" : "#F87171" },
-        { opacity: 0, duration: 0.9, ease: "power2.out" }
-      );
-    }
   }, [value]);
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <span ref={flashRef} style={{ position: "absolute", inset: 0, pointerEvents: "none", fontFamily: "var(--font-display)", fontSize, fontWeight: 600 }}>
-        {prefix}{value.toFixed(decimals)}{suffix}
-      </span>
-      <span ref={elRef} style={{ fontFamily: "var(--font-display)", fontSize, fontWeight: 600, color: "var(--text-1)" }}>
-        {prefix}{value.toFixed(decimals)}{suffix}
-      </span>
-    </div>
+    <span ref={elRef} style={{
+      fontFamily: "var(--font-display)", fontSize, fontWeight: 600,
+      color: "var(--text-1)", display: "inline-block",
+    }}>
+      {prefix}{value.toFixed(decimals)}{suffix}
+    </span>
   );
 }
 
