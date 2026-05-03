@@ -30,7 +30,7 @@ function DashboardMain({ livePrice, priceChange }: { livePrice: number; priceCha
         alignItems: "stretch",
       }}>
         <ChartPanel livePrice={livePrice} priceChange={priceChange} />
-        <div style={{ width: 285, flexShrink: 0, height: 460, overflowY: "auto", borderLeft: "1px solid var(--border)" }}>
+        <div style={{ width: 285, flexShrink: 0, height: 580, overflowY: "auto", borderLeft: "1px solid var(--border)" }}>
           <RightPanel />
         </div>
       </div>
