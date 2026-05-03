@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { Plus, Trash2, Bell, BellOff, TrendingUp, TrendingDown, Search, Target } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "../components/Sparkline";
+import CoinIcon from "../components/CoinIcon";
 import { useApp } from "../context/AppContext";
 import { useCoinNav } from "../context/CoinNavContext";
 
@@ -263,15 +264,7 @@ export default function WatchlistView() {
               {/* Top: coin info + action buttons */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{
-                    width: 38, height: 38, borderRadius: "50%",
-                    background: coin.avatar + "20", border: `1px solid ${coin.avatar}40`,
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-                  }}>
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color: coin.avatar }}>
-                      {coin.symbol[0]}
-                    </span>
-                  </div>
+                  <CoinIcon symbol={coin.symbol} size={38} fallbackColor={coin.avatar} />
                   <div>
                     <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
                     <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-2)" }}>

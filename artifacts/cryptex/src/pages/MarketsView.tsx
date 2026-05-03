@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { Search, ChevronUp, ChevronDown } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "../components/Sparkline";
+import CoinIcon from "../components/CoinIcon";
 import { useApp } from "../context/AppContext";
 import { useCoinNav } from "../context/CoinNavContext";
 
@@ -321,15 +322,7 @@ export default function MarketsView() {
                         <td style={{ padding: "11px 14px", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)" }}>{i + 1}</td>
                         <td style={{ padding: "11px 14px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{
-                              width: 32, height: 32, borderRadius: "50%",
-                              background: coin.avatar + "20", border: `1px solid ${coin.avatar}40`,
-                              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-                            }}>
-                              <span style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 700, color: coin.avatar }}>
-                                {coin.symbol[0]}
-                              </span>
-                            </div>
+                            <CoinIcon symbol={coin.symbol} size={32} fallbackColor={coin.avatar} />
                             <div>
                               <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
                               <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: "var(--text-2)" }}>
