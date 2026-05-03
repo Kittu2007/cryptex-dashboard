@@ -22,21 +22,21 @@ function generateSparkData(base: number, trend: number): number[] {
   return pts;
 }
 
-function fmtMktCap(b: number): string {
-  if (b >= 1000) return `$${(b / 1000).toFixed(2)}T`;
-  if (b >= 1)    return `$${b.toFixed(1)}B`;
-  if (b > 0)     return `$${(b * 1000).toFixed(0)}M`;
+function fmtMktCap(b: number, sym: string): string {
+  if (b >= 1000) return `${sym}${(b / 1000).toFixed(2)}T`;
+  if (b >= 1)    return `${sym}${b.toFixed(1)}B`;
+  if (b > 0)     return `${sym}${(b * 1000).toFixed(0)}M`;
   return "—";
 }
-function fmtVol(b: number): string {
-  if (b >= 1)  return `$${b.toFixed(1)}B`;
-  if (b > 0)   return `$${(b * 1000).toFixed(0)}M`;
+function fmtVol(b: number, sym: string): string {
+  if (b >= 1)  return `${sym}${b.toFixed(1)}B`;
+  if (b > 0)   return `${sym}${(b * 1000).toFixed(0)}M`;
   return "—";
 }
 
 export default function WatchlistView() {
   const headerRef = useRef<HTMLDivElement>(null);
-  const { livePrices, formatPrice } = useApp();
+  const { livePrices, formatPrice, currencySymbol } = useApp();
 
   const [watchlist, setWatchlist]       = useState(["btc", "eth", "sol", "link"]);
   const [alerts, setAlerts]             = useState<Record<string, boolean>>({ btc: true, eth: false, sol: false, link: true });
@@ -415,9 +415,7 @@ export default function WatchlistView() {
                         fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700,
                         color: "var(--text-1)", letterSpacing: "-0.5px", marginBottom: 4,
                       }}>
-                        {price < 1
-                          ? `$${price.toFixed(4)}`
-                          : `$${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        {formatPrice(price)}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         {isUp
@@ -482,7 +480,7 @@ export default function WatchlistView() {
                           </div>
                           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                             <span style={{ fontFamily: "var(--font-data)", fontSize: 10, fontWeight: 600, color: "var(--accent)" }}>
-                              ${parseFloat(alertTargets[coin.id]).toLocaleString()}
+                              {currencySymbol}{parseFloat(alertTargets[coin.id]).toLocaleString()}
                             </span>
                             {ap && (
                               <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: ap.above ? "var(--bull)" : "var(--text-3)" }}>
@@ -508,8 +506,8 @@ export default function WatchlistView() {
                   {/* Stats footer */}
                   <div style={{ display: "flex", paddingTop: 10, borderTop: "1px solid var(--border)" }}>
                     {[
-                      { label: "Mkt Cap", value: fmtMktCap(mktCapB), color: "var(--text-2)" },
-                      { label: "Volume",  value: fmtVol(volumeB),     color: "var(--text-2)" },
+                      { label: "Mkt Cap", value: fmtMktCap(mktCapB, currencySymbol), color: "var(--text-2)" },
+                      { label: "Volume",  value: fmtVol(volumeB, currencySymbol),     color: "var(--text-2)" },
                       { label: "24H Hi",  value: formatPrice(price * 1.012), color: "var(--bull)" },
                       { label: "24H Lo",  value: formatPrice(price * 0.986), color: "var(--bear)" },
                     ].map((s, i) => (
@@ -570,7 +568,7 @@ export default function WatchlistView() {
                       </td>
                       <td align="right" style={{ padding: "12px 14px" }}>
                         <div className="wl-price" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", fontWeight: 600 }}>
-                          {price < 1 ? `$${price.toFixed(4)}` : `$${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          {formatPrice(price)}
                         </div>
                       </td>
                       <td align="right" style={{ padding: "12px 14px", fontFamily: "var(--font-data)", fontSize: 11, fontWeight: 600, color: isUp ? "var(--bull)" : "var(--bear)" }}>
@@ -580,10 +578,10 @@ export default function WatchlistView() {
                         {change7d >= 0 ? "+" : ""}{change7d.toFixed(1)}%
                       </td>
                       <td align="right" style={{ padding: "12px 14px", fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)" }}>
-                        {fmtMktCap(mktCapB)}
+                        {fmtMktCap(mktCapB, currencySymbol)}
                       </td>
                       <td align="right" style={{ padding: "12px 14px", fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)" }}>
-                        {fmtVol(volumeB)}
+                        {fmtVol(volumeB, currencySymbol)}
                       </td>
                       <td align="center" style={{ padding: "12px 14px" }}>
                         <span style={{

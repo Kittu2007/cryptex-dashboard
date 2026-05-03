@@ -83,7 +83,7 @@ interface AppContextType {
 
 const settingsDefaults: Settings = {
   currency: "USD",
-  theme: "Dark",
+  theme: "Light",
   compactMode: false,
   fontSize: "Medium",
   chartType: "Candlestick",
