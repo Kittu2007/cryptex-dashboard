@@ -14,12 +14,12 @@ const COST  = { BTC: 20554 / 1.664, ETH: 12846 / 1.469, SOL: 5995 / 0.882 };
 const OTHER_VAL  = 3425;
 const OTHER_COST = OTHER_VAL / 1.103;
 
-// Four vivid, clearly distinguishable colors
+// Four vivid, clearly distinguishable colors (no grey/black)
 const HOLD_COLORS = {
   BTC:   "#F59E0B",   // amber/gold
   ETH:   "#60A5FA",   // electric blue
   SOL:   "#34D399",   // emerald
-  Other: "#F472B6",   // hot pink
+  Other: "#A78BFA",   // violet/purple
 };
 
 // ── AnimatedNumber ─────────────────────────────────────────────────────────────
@@ -252,8 +252,9 @@ export default function RightPanel() {
   }, [totalGainPct]);
 
   // ── Donut segments (reactive to live allocations) ────────────────────────────
-  const size = 120, cx = 60, cy = 60, r = 42;
+  const size = 130, cx = 65, cy = 65, r = 46;
   const circumference = 2 * Math.PI * r;
+  const SEG_GAP = 3; // px gap between segments
   const liveHoldings = [
     { symbol: "BTC",   allocation: btcAlloc,   gainPct: btcGainPct,   color: HOLD_COLORS.BTC },
     { symbol: "ETH",   allocation: ethAlloc,   gainPct: ethGainPct,   color: HOLD_COLORS.ETH },
@@ -262,10 +263,12 @@ export default function RightPanel() {
   ];
   let accumulated = 0;
   const segments = liveHoldings.map(h => {
-    const dashArray  = (h.allocation / 100) * circumference;
-    const dashOffset = circumference - accumulated * circumference / 100;
+    // dashLen shrunk by gap so segments have visible separation
+    const dashLen    = Math.max(0, (h.allocation / 100) * circumference - SEG_GAP);
+    // positive offset pushes the dash start clockwise to the accumulated position
+    const dashOffset = circumference - (accumulated / 100) * circumference;
     accumulated += h.allocation;
-    return { ...h, dashArray, dashOffset };
+    return { ...h, dashLen, dashOffset };
   });
 
   const dominanceColor = liveMarket.btcDominance > 55 ? "var(--accent)" : liveMarket.btcDominance < 45 ? "var(--bear)" : "var(--accent)";
@@ -358,18 +361,26 @@ export default function RightPanel() {
         {/* Donut — reactive to live allocations */}
         <div style={{ display: "flex", justifyContent: "center", margin: "12px 0 8px" }}>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-raised)" strokeWidth="14" />
+            {/* Track ring — semi-transparent so it's visible in any theme */}
+            <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="13" />
+            {/* Segments — rotated -90° so first segment starts at 12 o'clock */}
             {segments.map((seg, i) => (
               <circle
-                key={i} className="donut-ring" cx={cx} cy={cy} r={r}
-                fill="none" stroke={seg.color} strokeWidth="14"
-                strokeDasharray={`${seg.dashArray} ${circumference - seg.dashArray}`}
-                strokeDashoffset={seg.dashOffset * -1}
-                style={{ transformOrigin: `${cx}px ${cy}px`, transition: "stroke-dasharray 0.7s ease, stroke-dashoffset 0.7s ease" }}
+                key={i}
+                cx={cx} cy={cy} r={r}
+                fill="none"
+                stroke={seg.color}
+                strokeWidth="13"
+                strokeLinecap="butt"
+                strokeDasharray={`${seg.dashLen} ${circumference - seg.dashLen}`}
+                strokeDashoffset={seg.dashOffset}
+                transform={`rotate(-90 ${cx} ${cy})`}
+                style={{ transition: "stroke-dasharray 0.7s ease, stroke-dashoffset 0.7s ease" }}
               />
             ))}
-            <text x={cx} y={cy - 5} textAnchor="middle" fill="var(--text-3)" fontSize="7" fontFamily="var(--font-ui)" letterSpacing="0.08em">PORTFOLIO</text>
-            <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--text-1)" fontSize="10" fontFamily="var(--font-display)" fontWeight="700">
+            {/* Center labels */}
+            <text x={cx} y={cy - 6} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="var(--font-ui)" letterSpacing="0.08em">PORTFOLIO</text>
+            <text x={cx} y={cy + 9} textAnchor="middle" fill="var(--text-1)" fontSize="11" fontFamily="var(--font-display)" fontWeight="700">
               {formatPrice(totalVal, true)}
             </text>
           </svg>
