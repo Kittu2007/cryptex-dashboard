@@ -153,7 +153,8 @@ export default function MarketTable() {
 
   return (
     <div ref={tableRef} style={{ padding: "0 24px", borderBottom: "1px solid var(--border)" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }} className="market-table">
+      <div className="table-scroll">
+      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }} className="market-table">
         <thead>
           <tr style={{ borderBottom: "1px solid var(--border)" }}>
             <th style={thStyle()} align="left">#</th>
@@ -164,13 +165,13 @@ export default function MarketTable() {
             <th style={{ ...thStyle("change24h"), textAlign: "right" }} onClick={() => handleSort("change24h")}>
               24H <SortIcon col="change24h" />
             </th>
-            <th style={{ ...thStyle("change7d"), textAlign: "right" }} onClick={() => handleSort("change7d")}>
+            <th className="hide-mobile" style={{ ...thStyle("change7d"), textAlign: "right" }} onClick={() => handleSort("change7d")}>
               7D Chart <SortIcon col="change7d" />
             </th>
-            <th style={{ ...thStyle("marketCap"), textAlign: "right" }} onClick={() => handleSort("marketCap")}>
+            <th className="hide-tablet" style={{ ...thStyle("marketCap"), textAlign: "right" }} onClick={() => handleSort("marketCap")}>
               Mkt Cap <SortIcon col="marketCap" />
             </th>
-            <th style={{ ...thStyle("volume"), textAlign: "right" }} onClick={() => handleSort("volume")}>
+            <th className="hide-mobile" style={{ ...thStyle("volume"), textAlign: "right" }} onClick={() => handleSort("volume")}>
               Volume <SortIcon col="volume" />
             </th>
             <th style={{ ...thStyle("signal"), textAlign: "right" }} onClick={() => handleSort("signal")}>
@@ -181,7 +182,7 @@ export default function MarketTable() {
         <tbody ref={rowsRef}>
           {loading
             ? Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
+                <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>
                   <td colSpan={8} style={{ padding: "12px 0" }}>
                     <div className="skeleton" style={{ height: 16, borderRadius: 3 }} />
                   </td>
@@ -189,50 +190,47 @@ export default function MarketTable() {
               ))
             : sorted.map((coin, i) => {
                 const lp = livePrices[coin.symbol];
-                const livePrice   = lp?.price      ?? coin.price;
-                const liveChange  = lp?.change24h  ?? coin.change24h;
-                const liveChange7d = lp?.change7d  ?? coin.change7d;
+                const livePrice    = lp?.price      ?? coin.price;
+                const liveChange   = lp?.change24h  ?? coin.change24h;
+                const liveChange7d = lp?.change7d   ?? coin.change7d;
                 const liveMktCapB  = lp?.marketCapB ?? parseBillions(coin.marketCap);
                 const liveVolumeB  = lp?.volumeB    ?? parseBillions(coin.volume);
                 const is24Up = liveChange   >= 0;
                 const is7Up  = liveChange7d >= 0;
                 return (
                   <tr key={coin.id} className="mkt-row" style={{
-                    borderBottom: "1px solid rgba(31,31,46,0.4)",
-                    transition: "background 0.1s", cursor: "pointer"
+                    borderBottom: "1px solid var(--border)",
+                    transition: "background 0.1s", cursor: "pointer",
                   }}
                     onClick={() => navigateToCoin(coin.symbol)}
                     onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
                     onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >
-                    <td style={{ padding: "10px 0", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", paddingRight: 16 }}>
+                    <td style={{ padding: "11px 0", fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-3)", paddingRight: 12, minWidth: 28 }}>
                       {i + 1}
                     </td>
-                    <td style={{ padding: "10px 16px 10px 0" }}>
+                    <td style={{ padding: "11px 16px 11px 0", minWidth: 130 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <CoinIcon symbol={coin.symbol} size={28} fallbackColor={coin.avatar} />
                         <div>
-                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
-                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{coin.symbol}</div>
+                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 13, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
+                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-2)" }}>{coin.symbol}</div>
                         </div>
                       </div>
                     </td>
                     <td
                       ref={el => { priceRefs.current[coin.symbol] = el; }}
                       align="right"
-                      style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", paddingRight: 16, transition: "color 0.15s" }}
+                      style={{ fontFamily: "var(--font-data)", fontSize: 13, fontWeight: 500, color: "var(--text-1)", paddingRight: 16, transition: "color 0.15s", minWidth: 90 }}
                     >
                       {formatPrice(livePrice)}
                     </td>
-                    <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is24Up ? "var(--bull)" : "var(--bear)", paddingRight: 16 }}>
-                      <span style={{
-                        padding: "1px 5px", borderRadius: 3,
-                        background: is24Up ? "var(--bull-bg)" : "var(--bear-bg)"
-                      }}>
+                    <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: is24Up ? "var(--bull)" : "var(--bear)", paddingRight: 16, minWidth: 68 }}>
+                      <span style={{ padding: "2px 6px", borderRadius: 4, background: is24Up ? "var(--bull-bg)" : "var(--bear-bg)" }}>
                         {is24Up ? "+" : "−"}{Math.abs(liveChange).toFixed(1)}%
                       </span>
                     </td>
-                    <td align="right" style={{ paddingRight: 16 }}>
+                    <td className="hide-mobile" align="right" style={{ paddingRight: 16, minWidth: 110 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
                         <Sparkline data={sparkData[coin.id]} width={50} height={22} />
                         <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is7Up ? "var(--bull)" : "var(--bear)", minWidth: 42, textAlign: "right" }}>
@@ -240,18 +238,19 @@ export default function MarketTable() {
                         </span>
                       </div>
                     </td>
-                    <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
+                    <td className="hide-tablet" align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-2)", paddingRight: 16, minWidth: 80 }}>
                       ${formatBillions(liveMktCapB)}
                     </td>
-                    <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
+                    <td className="hide-mobile" align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-2)", paddingRight: 16, minWidth: 80 }}>
                       ${formatBillions(liveVolumeB)}
                     </td>
-                    <td align="right"><SignalPill change={liveChange} /></td>
+                    <td align="right" style={{ minWidth: 72 }}><SignalPill change={liveChange} /></td>
                   </tr>
                 );
               })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

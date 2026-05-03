@@ -100,10 +100,10 @@ export default function TopRibbon() {
   ];
 
   return (
-    <div className="top-ribbon" ref={ribbonRef} style={{ paddingLeft: 20, paddingRight: 16, gap: 0, position: "relative" }}>
+    <div className="top-ribbon" ref={ribbonRef} style={{ paddingLeft: 20, paddingRight: 16, gap: 0, position: "relative", overflow: "visible" }}>
 
       {/* ── Pair selector + price ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }} ref={pairRef}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", flexShrink: 0 }} ref={pairRef}>
 
         {/* Pair button */}
         <button
@@ -192,7 +192,7 @@ export default function TopRibbon() {
           padding: "2px 7px", borderRadius: 4, whiteSpace: "nowrap",
         }}>
           {isUp ? "+" : ""}{change.toFixed(2)}%
-          {" "}({isUp ? "+" : "−"}{formatPrice(Math.abs(change * price * 0.01))})
+          <span className="ribbon-change-detail">{" "}({isUp ? "+" : "−"}{formatPrice(Math.abs(change * price * 0.01))})</span>
         </span>
 
         {!settings.autoRefresh && (
@@ -289,12 +289,13 @@ export default function TopRibbon() {
               fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-2)",
               background: "var(--bg-raised)", border: "1px solid var(--border-2)",
               borderRadius: 4, padding: "5px 10px", cursor: "pointer", transition: "border-color 0.15s",
+              whiteSpace: "nowrap",
             }}
             onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--accent)")}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
           >
             <Wallet size={11} />
-            Connect Wallet
+            <span className="wallet-btn-text">Connect Wallet</span>
           </button>
         )}
 

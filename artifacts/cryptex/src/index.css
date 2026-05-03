@@ -281,10 +281,61 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   font-size: 10px;
 }
 
-/* ── Mobile ────────────────────────────────────────────────────────────────── */
+/* ── Right panel outer container ───────────────────────────────────────────── */
+.right-panel-outer {
+  width: 280px;
+  flex-shrink: 0;
+  height: 580px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+}
+
+/* ── Coin tabs — horizontally scrollable ────────────────────────────────────── */
+.coin-tabs-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.coin-tabs-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Chart controls toolbar ─────────────────────────────────────────────────── */
+.chart-controls-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Table horizontal scroll on small screens ───────────────────────────────── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+/* ── Responsive visibility helpers ──────────────────────────────────────────── */
+.hide-xs   { }
+.hide-sm   { }
+.hide-md   { }
+.show-mobile { display: none !important; }
+
+/* ── Tablet (769px – 1100px) ───────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .right-panel-outer { width: 230px; }
+  .hide-tablet { display: none !important; }
+}
+
+/* ── Small tablet / large mobile (481px – 768px) ──────────────────────────── */
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .main-content { margin-left: 0; padding-bottom: 60px; }
+
   .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
     background: var(--bg-surface);
@@ -292,11 +343,53 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
     display: flex; align-items: center; justify-content: space-around;
     z-index: 50;
   }
-  .hero-row         { flex-direction: column !important; }
-  .right-panel      { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border) !important; }
-  .bottom-three     { flex-direction: column !important; }
-  .bottom-col       { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-  .ribbon-mid       { display: none !important; }
+
+  /* Layout stacking */
+  .hero-row      { flex-direction: column !important; }
+  .bottom-three  { flex-direction: column !important; }
+  .bottom-col    { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+
+  /* Right panel full width */
+  .right-panel-outer {
+    width: 100% !important;
+    height: auto !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    max-height: none !important;
+  }
+
+  /* Ribbon */
+  .ribbon-mid { display: none !important; }
+
+  /* Chart toolbar wraps onto a second row */
+  .chart-toolbar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding-bottom: 8px !important;
+    align-items: flex-start !important;
+  }
+
+  /* Chart area — taller than minimum for readability */
+  .chart-area-main { min-height: 260px !important; }
+
+  /* Table columns */
+  .hide-mobile { display: none !important; }
+
+  /* Visibility */
+  .show-mobile { display: flex !important; }
+
+  /* Wallet button text */
+  .wallet-btn-text { display: none !important; }
+}
+
+/* ── Extra small mobile (≤480px) ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .top-ribbon { padding-left: 10px !important; padding-right: 8px !important; }
+  .ribbon-change-detail { display: none !important; }
+  .ribbon-pair-price { font-size: 13px !important; }
+  .chart-controls-wrap { gap: 3px !important; }
+  .hide-xs { display: none !important; }
+  :root { --base-font-size: 12px; }
 }
 
 @media (min-width: 769px) {

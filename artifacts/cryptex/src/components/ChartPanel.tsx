@@ -473,12 +473,13 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
     <div ref={containerRef} style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
 
       {/* ── Controls toolbar ── */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+      <div className="chart-toolbar" style={{
+        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
         padding: "10px 20px 0", borderBottom: "1px solid var(--border)", flexShrink: 0,
+        flexWrap: "wrap", gap: 0,
       }}>
-        {/* Coin tabs */}
-        <div style={{ display: "flex" }}>
+        {/* Coin tabs — scrollable on narrow screens */}
+        <div className="coin-tabs-scroll">
           {coinTabs.map(coin => {
             const chg = livePrices[coin]?.change24h ?? 0;
             const active = activePair === coin;
@@ -503,7 +504,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
         </div>
 
         {/* Right controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 10 }}>
+        <div className="chart-controls-wrap">
           {/* Time ranges */}
           <div style={{ display: "flex", gap: 1, background: "var(--bg-raised)", borderRadius: 5, padding: 2 }}>
             {timeRanges.map(r => (

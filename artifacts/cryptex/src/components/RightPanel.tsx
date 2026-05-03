@@ -274,8 +274,8 @@ export default function RightPanel() {
 
   return (
     <div ref={panelRef} className="right-panel" style={{
-      width: 280, background: "var(--bg-surface)", borderLeft: "1px solid var(--border)",
-      padding: "20px 16px", overflowY: "auto", flexShrink: 0,
+      width: "100%", background: "var(--bg-surface)",
+      padding: "20px 16px", overflowY: "auto",
       transition: "background-color 0.3s ease",
     }}>
 
