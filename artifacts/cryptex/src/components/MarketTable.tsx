@@ -128,8 +128,8 @@ export default function MarketTable() {
   );
 
   const thStyle = (key?: SortKey): React.CSSProperties => ({
-    fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
-    letterSpacing: "0.15em", textTransform: "uppercase",
+    fontFamily: "var(--font-ui)", fontSize: 10, fontWeight: 600,
+    letterSpacing: "0.10em", textTransform: "uppercase",
     color: sortKey === key ? "var(--text-2)" : "var(--text-3)",
     padding: "10px 0", cursor: key ? "pointer" : "default",
     userSelect: "none", whiteSpace: "nowrap"
@@ -142,7 +142,7 @@ export default function MarketTable() {
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         {isBull ? <TrendingUp size={9} style={{ color: "var(--bull)" }} /> : isBear ? <TrendingDown size={9} style={{ color: "var(--bear)" }} /> : null}
         <span style={{
-          fontFamily: "var(--font-ui)", fontSize: 9,
+          fontFamily: "var(--font-ui)", fontSize: 11,
           color: isBull ? "var(--bull)" : isBear ? "var(--bear)" : "var(--text-2)",
           background: isBull ? "var(--bull-bg)" : isBear ? "var(--bear-bg)" : "transparent",
           padding: "2px 6px", borderRadius: 3

@@ -108,7 +108,7 @@ function FearGreedGauge({ value }: { value: number }) {
     <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
         <span className="section-label">FEAR &amp; GREED</span>
-        <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: labelColor, background: value > 60 ? "var(--bull-bg)" : value < 40 ? "var(--bear-bg)" : "transparent", padding: "1px 6px", borderRadius: 3, transition: "color 0.4s, background 0.4s" }}>
+        <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: labelColor, background: value > 60 ? "var(--bull-bg)" : value < 40 ? "var(--bear-bg)" : "transparent", padding: "1px 6px", borderRadius: 3, transition: "color 0.4s, background 0.4s" }}>
           {label}
         </span>
       </div>
@@ -165,13 +165,13 @@ function HoldingRow({ symbol, color, allocation, gainPct }: {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div style={{ width: 10, height: 10, borderRadius: 3, background: color, flexShrink: 0, boxShadow: `0 0 6px ${color}60` }} />
-        <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)", fontWeight: 500 }}>{symbol}</span>
+        <span style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-1)", fontWeight: 500 }}>{symbol}</span>
       </div>
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-        <span ref={allocRef} style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", minWidth: 36, textAlign: "right" }}>
+        <span ref={allocRef} style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-3)", minWidth: 36, textAlign: "right" }}>
           {allocation.toFixed(1)}%
         </span>
-        <span ref={gainRef} style={{ fontFamily: "var(--font-data)", fontSize: 10, color: gainPct >= 0 ? "var(--bull)" : "var(--bear)", minWidth: 52, textAlign: "right" }}>
+        <span ref={gainRef} style={{ fontFamily: "var(--font-data)", fontSize: 11, color: gainPct >= 0 ? "var(--bull)" : "var(--bear)", minWidth: 52, textAlign: "right" }}>
           {gainPct >= 0 ? "+" : ""}{gainPct.toFixed(1)}%
         </span>
       </div>

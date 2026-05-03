@@ -135,7 +135,7 @@ export default function TopRibbon() {
             boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
           }}>
             <div style={{ padding: "6px 10px 4px", borderBottom: "1px solid var(--border)" }}>
-              <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)", letterSpacing: "0.12em" }}>
+              <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.10em" }}>
                 SELECT PAIR
               </span>
             </div>
@@ -209,8 +209,8 @@ export default function TopRibbon() {
           <div key={i} style={{ display: "flex", alignItems: "center" }}>
             {i > 0 && <div className="v-divider" style={{ margin: "0 14px" }} />}
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <span className="section-label" style={{ fontSize: 8 }}>{stat.label}</span>
-              <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)" }}>{stat.value}</span>
+              <span className="section-label" style={{ fontSize: 10 }}>{stat.label}</span>
+              <span style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)" }}>{stat.value}</span>
             </div>
           </div>
         ))}

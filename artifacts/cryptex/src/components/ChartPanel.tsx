@@ -497,8 +497,8 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
               }}>
                 <CoinIcon symbol={coin} size={18} fallbackColor={chg >= 0 ? "#22C55E" : "#EF4444"} />
                 <div>
-                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 11, fontWeight: 600, color: active ? "var(--text-1)" : "var(--text-2)", marginBottom: 1 }}>{coin}</div>
-                  <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: chg >= 0 ? "var(--bull)" : "var(--bear)", opacity: active ? 1 : 0.6 }}>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: active ? "var(--text-1)" : "var(--text-2)", marginBottom: 1 }}>{coin}</div>
+                  <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: chg >= 0 ? "var(--bull)" : "var(--bear)", opacity: active ? 1 : 0.6 }}>
                     {chg >= 0 ? "+" : ""}{chg.toFixed(1)}%
                   </div>
                 </div>
@@ -516,7 +516,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
                 background: activeRange === r ? "var(--bg-surface)" : "none",
                 border: activeRange === r ? "1px solid var(--border-2)" : "1px solid transparent",
                 borderRadius: 4, cursor: "pointer",
-                fontFamily: "var(--font-data)", fontSize: 10,
+                fontFamily: "var(--font-data)", fontSize: 12,
                 color: activeRange === r ? "var(--accent)" : "var(--text-3)",
                 padding: "3px 9px", transition: "all 0.12s",
                 fontWeight: activeRange === r ? 600 : 400,
@@ -756,7 +756,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
           }}>
             {isUp ? "+" : ""}{coinChange.toFixed(2)}%
           </span>
-          <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)", marginLeft: 4 }}>
+          <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-3)", marginLeft: 4 }}>
             {meta.name} · {activeRange}
           </span>
         </div>
@@ -768,13 +768,13 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
             { label: "MA(25)", val: maValues.ma25, color: "#94A3B8" },
             { label: "MA(99)", val: maValues.ma99, color: "#60A5FA" },
           ].map(({ label, val, color }) => (
-            <span key={label} style={{ fontFamily: "var(--font-data)", fontSize: 9, color }}>
+            <span key={label} style={{ fontFamily: "var(--font-data)", fontSize: 11, color }}>
               {label} {fmtMA(val)}
             </span>
           ))}
           {INDICATORS.filter(ind => ind.cat === "Overlay" && activeIndicators.has(ind.id)).map(ind => (
             <span key={ind.id} style={{
-              fontFamily: "var(--font-data)", fontSize: 9, color: ind.color,
+              fontFamily: "var(--font-data)", fontSize: 11, color: ind.color,
               background: `${ind.color}18`, padding: "1px 6px", borderRadius: 3,
               border: `1px solid ${ind.color}40`,
             }}>
@@ -839,14 +839,14 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
       {/* ── Indicator strip ── */}
       <div style={{
         display: "flex", gap: 18, flexWrap: "nowrap", overflowX: "auto",
-        padding: "7px 20px", borderTop: "1px solid var(--border)", flexShrink: 0,
+        padding: "8px 20px", borderTop: "1px solid var(--border)", flexShrink: 0,
       }}>
         {strip.map((s, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
-            <span style={{ fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", whiteSpace: "nowrap" }}>
+          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
+            <span style={{ fontFamily: "var(--font-ui)", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-3)", whiteSpace: "nowrap" }}>
               {s.label}
             </span>
-            <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: s.color, whiteSpace: "nowrap" }}>
+            <span style={{ fontFamily: "var(--font-data)", fontSize: 13, color: s.color, whiteSpace: "nowrap" }}>
               {s.value}
             </span>
           </div>

@@ -48,7 +48,7 @@
   --font-display: 'Sora', sans-serif;
   --font-ui:      'Inter', sans-serif;
   --font-data:    'JetBrains Mono', monospace;
-  --base-font-size: 13px;
+  --base-font-size: 14px;
 }
 
 /* ── Light theme overrides ─────────────────────────────────────────────────── */
@@ -231,9 +231,9 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
 /* ── Section label ─────────────────────────────────────────────────────────── */
 .section-label {
   font-family: var(--font-ui);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--text-3);
 }
@@ -396,7 +396,7 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   .ribbon-pair-price { font-size: 13px !important; }
   .chart-controls-wrap { gap: 3px !important; }
   .hide-xs { display: none !important; }
-  :root { --base-font-size: 12px; }
+  :root { --base-font-size: 13px; }
 }
 
 @media (min-width: 769px) {
