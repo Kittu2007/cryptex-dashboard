@@ -385,15 +385,19 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
     align-items: flex-start !important;
   }
 
-  /* Chart panel — needs an explicit height when stacked so flex:1 works */
-  .chart-panel { min-height: 460px; }
+  /* Chart panel — let it size naturally around the chart */
+  .chart-panel { min-height: 0; }
 
-  /* Chart area — explicit height so lightweight-charts canvas fills it */
+  /* Chart area — viewport-relative so it fills the screen on any phone */
   .chart-area-main {
     flex: none !important;
-    height: 280px !important;
-    min-height: 280px !important;
+    height: clamp(260px, 48vh, 420px) !important;
+    min-height: 260px !important;
   }
+
+  /* Coin tabs — compact on mobile */
+  .coin-tabs-scroll button { padding: 0 8px 8px !important; }
+  .coin-tab-icon { width: 16px !important; height: 16px !important; }
 
   /* Table columns */
   .hide-mobile { display: none !important; }
@@ -413,6 +417,12 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   .chart-controls-wrap { gap: 3px !important; }
   .hide-xs { display: none !important; }
   :root { --base-font-size: 13px; }
+
+  /* Chart area slightly shorter on very small phones */
+  .chart-area-main {
+    height: clamp(220px, 44vh, 320px) !important;
+    min-height: 220px !important;
+  }
 }
 
 @media (min-width: 769px) {
