@@ -57,12 +57,20 @@ export const trending = [
 ];
 
 export const news = [
-  { source: "CoinDesk",   category: "Markets",   title: "Bitcoin breaks $68K resistance as institutional demand surges ahead of halving",  sentiment: 78, time: "2h ago"  },
-  { source: "The Block",  category: "Ethereum",  title: "ETH staking yields compress as validator count hits new all-time high",           sentiment: 42, time: "4h ago"  },
-  { source: "Decrypt",    category: "DeFi",      title: "Solana ecosystem records all-time DEX volume in Q1 2026, surpassing Ethereum",   sentiment: 65, time: "6h ago"  },
-  { source: "Bloomberg",  category: "Macro",     title: "Fed signals rate cuts could accelerate crypto rally through H2 2026",            sentiment: 71, time: "9h ago"  },
-  { source: "Blockworks", category: "Regulation",title: "SEC approves spot Ethereum ETF options, opening $18B in institutional exposure", sentiment: 83, time: "12h ago" },
-  { source: "CoinTelegraph",category:"Altcoins", title: "Chainlink CCIP adoption hits 500 protocols — analyst targets $30 by Q3",        sentiment: 38, time: "1d ago"  },
+  { source: "CoinDesk",     category: "Markets",    title: "Bitcoin breaks $68K resistance as institutional demand surges ahead of halving",          sentiment: 78, time: "2h ago"  },
+  { source: "The Block",    category: "Ethereum",   title: "ETH staking yields compress as validator count hits new all-time high",                    sentiment: 42, time: "4h ago"  },
+  { source: "Decrypt",      category: "DeFi",       title: "Solana ecosystem records all-time DEX volume in Q1 2026, surpassing Ethereum",             sentiment: 65, time: "6h ago"  },
+  { source: "Bloomberg",    category: "Macro",       title: "Fed signals rate cuts could accelerate crypto rally through H2 2026",                      sentiment: 71, time: "9h ago"  },
+  { source: "Blockworks",   category: "Regulation",  title: "SEC approves spot Ethereum ETF options, opening $18B in institutional exposure",           sentiment: 83, time: "12h ago" },
+  { source: "CoinTelegraph",category: "Altcoins",    title: "Chainlink CCIP adoption hits 500 protocols — analyst targets $30 by Q3",                  sentiment: 38, time: "1d ago"  },
+  { source: "CoinDesk",     category: "Bitcoin",     title: "MicroStrategy adds 15,000 BTC to treasury, total holdings cross 400,000 coins",           sentiment: 89, time: "1d ago"  },
+  { source: "Reuters",      category: "Macro",       title: "G20 agrees on crypto tax framework, placing pressure on offshore DeFi platforms",          sentiment: 32, time: "1d ago"  },
+  { source: "The Defiant",  category: "DeFi",        title: "Uniswap v4 hooks drive $2B TVL migration within first week of mainnet launch",             sentiment: 74, time: "2d ago"  },
+  { source: "Financial Times",category: "Macro",     title: "BlackRock crypto AUM crosses $50B milestone driven by spot Bitcoin ETF inflows",           sentiment: 76, time: "2d ago"  },
+  { source: "CoinTelegraph",category: "Layer2",      title: "Ethereum L2 networks process 10× more daily transactions than mainnet for first time",     sentiment: 68, time: "3d ago"  },
+  { source: "Watcher.Guru", category: "XRP",         title: "XRP futures open interest surges 340% as SEC ETF decision deadline approaches",            sentiment: 29, time: "3d ago"  },
+  { source: "Blockworks",   category: "Staking",     title: "Ethereum validator queue clears to zero as staking yields stabilize near 4.2% APR",       sentiment: 55, time: "4d ago"  },
+  { source: "Decrypt",      category: "Gaming",      title: "Web3 gaming daily active wallets double in 2026, surpassing 12M across all chains",        sentiment: 61, time: "4d ago"  },
 ];
 
 export const indicators = [
