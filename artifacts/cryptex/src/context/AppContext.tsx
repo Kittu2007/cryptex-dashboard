@@ -177,16 +177,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return next;
       });
 
-      // Update market stats with slight fluctuation
+      // Update market stats with visible fluctuation
       setLiveMarket(prev => {
         const m = marketRef.current;
         return {
-          marketCap: parseFloat((m.marketCap + (Math.random() - 0.5) * 0.008).toFixed(3)),
-          volume24h: parseFloat((m.volume24h + (Math.random() - 0.5) * 0.4).toFixed(1)),
-          btcDominance: parseFloat((m.btcDominance + (Math.random() - 0.5) * 0.06).toFixed(1)),
-          high24h: Math.max(m.high24h, prev.high24h),
-          low24h: Math.min(m.low24h, prev.low24h),
-          fearGreed: Math.min(100, Math.max(0, Math.round(m.fearGreed + (Math.random() - 0.5) * 1.5))),
+          marketCap:    parseFloat((m.marketCap    + (Math.random() - 0.5) * 0.022).toFixed(3)),
+          volume24h:    parseFloat((m.volume24h    + (Math.random() - 0.5) * 1.2).toFixed(1)),
+          btcDominance: parseFloat(Math.min(75, Math.max(40,
+                          m.btcDominance + (Math.random() - 0.5) * 0.5
+                        )).toFixed(1)),
+          high24h:  Math.max(m.high24h, prev.high24h),
+          low24h:   Math.min(m.low24h,  prev.low24h),
+          fearGreed: Math.min(100, Math.max(0,
+                      Math.round(m.fearGreed + (Math.random() - 0.5) * 4)
+                    )),
         };
       });
     }, ms);
