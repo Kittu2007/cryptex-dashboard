@@ -436,7 +436,9 @@ function NewsCol() {
               style={{
                 flexShrink: 0, cursor: "pointer",
                 background: isHovered ? "var(--bg-hover)" : "var(--bg-raised)",
-                border: `1px solid ${isHovered ? accent + "55" : "var(--border)"}`,
+                borderTop: `1px solid ${isHovered ? accent + "55" : "var(--border)"}`,
+                borderRight: `1px solid ${isHovered ? accent + "55" : "var(--border)"}`,
+                borderBottom: `1px solid ${isHovered ? accent + "55" : "var(--border)"}`,
                 borderLeft: `3px solid ${accent}`,
                 borderRadius: 8,
                 padding: "10px 12px",
