@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ChevronDown, Wallet, X, Zap } from "lucide-react";
+import { ChevronDown, Wallet, X, Zap, Sun, Moon } from "lucide-react";
 import CoinIcon from "./CoinIcon";
-import { useApp } from "../context/AppContext";
+import { useApp, CURRENCY_SYMBOLS } from "../context/AppContext";
+import type { Currency } from "../context/AppContext";
+
+const CURRENCIES: Currency[] = ["USD", "EUR", "GBP", "JPY", "INR"];
 
 // Per-coin 24H stat anchors (% offsets from current price)
 const COIN_STATS: Record<string, {
@@ -30,10 +33,16 @@ export default function TopRibbon() {
   const prevPrice = useRef(0);
 
   const {
-    formatPrice, currencySymbol, settings,
+    formatPrice, currencySymbol, settings, updateSetting,
     livePrices, liveMarket,
     activePair, setActivePair,
   } = useApp();
+
+  const isDark = settings.theme !== "Light";
+  const toggleTheme = () => updateSetting("theme", isDark ? "Light" : "Dark");
+
+  const currIdx      = CURRENCIES.indexOf(settings.currency);
+  const cycleCurrency = () => updateSetting("currency", CURRENCIES[(currIdx + 1) % CURRENCIES.length]);
 
   const coin   = livePrices[activePair];
   const price  = coin?.price  ?? 0;
@@ -207,8 +216,57 @@ export default function TopRibbon() {
         ))}
       </div>
 
+      {/* ── Currency + Theme toggles ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 14, flexShrink: 0 }}>
+
+        {/* Currency cycle button */}
+        <button
+          onClick={cycleCurrency}
+          title={`Switch currency (${CURRENCIES.map(c => CURRENCY_SYMBOLS[c] + c).join(" → ")})`}
+          style={{
+            display: "flex", alignItems: "center", gap: 4,
+            fontFamily: "var(--font-data)", fontSize: 10, fontWeight: 600,
+            color: "var(--accent)",
+            background: "var(--accent-dim)",
+            border: "1px solid rgba(139,92,246,0.3)",
+            borderRadius: 5, padding: "4px 9px", cursor: "pointer",
+            transition: "all 0.15s", whiteSpace: "nowrap",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,0.18)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-dim)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)"; }}
+        >
+          <span style={{ fontSize: 11 }}>{CURRENCY_SYMBOLS[settings.currency]}</span>
+          {settings.currency}
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={isDark ? "Switch to Light mode" : "Switch to Dark mode"}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 28, height: 28,
+            background: isDark ? "var(--bg-raised)" : "rgba(251,191,36,0.12)",
+            border: isDark ? "1px solid var(--border-2)" : "1px solid rgba(251,191,36,0.4)",
+            borderRadius: 5, cursor: "pointer",
+            color: isDark ? "var(--text-2)" : "#FBBF24",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = isDark ? "var(--bg-hover)" : "rgba(251,191,36,0.22)";
+            e.currentTarget.style.borderColor = isDark ? "var(--accent)" : "rgba(251,191,36,0.7)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = isDark ? "var(--bg-raised)" : "rgba(251,191,36,0.12)";
+            e.currentTarget.style.borderColor = isDark ? "var(--border-2)" : "rgba(251,191,36,0.4)";
+          }}
+        >
+          {isDark ? <Sun size={13} /> : <Moon size={13} />}
+        </button>
+      </div>
+
       {/* ── Connect Wallet ── */}
-      <div ref={walletRef} style={{ marginLeft: "auto", position: "relative" }}>
+      <div ref={walletRef} style={{ marginLeft: 10, position: "relative" }}>
         {connected ? (
           <button
             onClick={() => { setWalletMenu(v => !v); setDropOpen(false); }}
