@@ -9,7 +9,7 @@ import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type SortKey = "price" | "change24h" | "change7d" | "marketCap" | "volume";
+type SortKey = "price" | "change24h" | "change7d" | "marketCap" | "volume" | "signal";
 type SortDir = "asc" | "desc";
 
 function generateSparkData(base: number, trend: number): number[] {
@@ -85,6 +85,13 @@ export default function MarketTable() {
     else { setSortKey(key); setSortDir("desc"); }
   }
 
+  function resolveSignal(change: number): "Bullish" | "Neutral" | "Bearish" {
+    if (change > 1.0) return "Bullish";
+    if (change < -1.0) return "Bearish";
+    return "Neutral";
+  }
+  const signalRank: Record<string, number> = { Bullish: 2, Neutral: 1, Bearish: 0 };
+
   const sorted = [...coins].sort((a, b) => {
     const lpa = livePrices[a.symbol];
     const lpb = livePrices[b.symbol];
@@ -92,13 +99,19 @@ export default function MarketTable() {
     const bPrice = lpb?.price ?? b.price;
     const aChange = lpa?.change24h ?? a.change24h;
     const bChange = lpb?.change24h ?? b.change24h;
-    const parseNum = (v: string) => parseFloat(v.replace(/[TBMK]/g, ""));
+    const a7d = lpa?.change7d ?? a.change7d;
+    const b7d = lpb?.change7d ?? b.change7d;
+    const aMktCap = lpa?.marketCapB ?? parseBillions(a.marketCap);
+    const bMktCap = lpb?.marketCapB ?? parseBillions(b.marketCap);
+    const aVol = lpa?.volumeB ?? parseBillions(a.volume);
+    const bVol = lpb?.volumeB ?? parseBillions(b.volume);
     let aVal: number, bVal: number;
-    if (sortKey === "price") { aVal = aPrice; bVal = bPrice; }
+    if (sortKey === "price")     { aVal = aPrice; bVal = bPrice; }
     else if (sortKey === "change24h") { aVal = aChange; bVal = bChange; }
-    else if (sortKey === "change7d") { aVal = a.change7d; bVal = b.change7d; }
-    else if (sortKey === "marketCap") { aVal = parseNum(a.marketCap); bVal = parseNum(b.marketCap); }
-    else { aVal = parseNum(a.volume); bVal = parseNum(b.volume); }
+    else if (sortKey === "change7d")  { aVal = a7d; bVal = b7d; }
+    else if (sortKey === "marketCap") { aVal = aMktCap; bVal = bMktCap; }
+    else if (sortKey === "volume")    { aVal = aVol; bVal = bVol; }
+    else { aVal = signalRank[resolveSignal(aChange)]; bVal = signalRank[resolveSignal(bChange)]; }
     return sortDir === "desc" ? bVal - aVal : aVal - bVal;
   });
 
@@ -120,10 +133,8 @@ export default function MarketTable() {
     userSelect: "none", whiteSpace: "nowrap"
   });
 
-  const SignalPill = ({ signal, change }: { signal: string; change: number }) => {
-    const isLiveBull = change > 1;
-    const isLiveBear = change < -1;
-    const resolved = isLiveBull ? "Bullish" : isLiveBear ? "Bearish" : signal === "Neutral" ? "Neutral" : signal;
+  const SignalPill = ({ change }: { change: number }) => {
+    const resolved = resolveSignal(change);
     const isBull = resolved === "Bullish", isBear = resolved === "Bearish";
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -160,7 +171,9 @@ export default function MarketTable() {
             <th style={{ ...thStyle("volume"), textAlign: "right" }} onClick={() => handleSort("volume")}>
               Volume <SortIcon col="volume" />
             </th>
-            <th style={thStyle()} align="right">Signal</th>
+            <th style={{ ...thStyle("signal"), textAlign: "right" }} onClick={() => handleSort("signal")}>
+              Signal <SortIcon col="signal" />
+            </th>
           </tr>
         </thead>
         <tbody ref={rowsRef}>
@@ -230,7 +243,7 @@ export default function MarketTable() {
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
                       ${formatBillions(liveVolumeB)}
                     </td>
-                    <td align="right"><SignalPill signal={coin.signal} change={liveChange} /></td>
+                    <td align="right"><SignalPill change={liveChange} /></td>
                   </tr>
                 );
               })}
