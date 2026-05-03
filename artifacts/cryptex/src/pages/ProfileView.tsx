@@ -104,13 +104,13 @@ export default function ProfileView() {
   const tabs = ["Account", "API Keys", "Security", "Billing"];
 
   return (
-    <div style={{ padding: "24px 28px" }}>
+    <div className="page-wrap" style={{ padding: "24px 28px" }}>
       <div ref={headerRef} style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--text-1)", marginBottom: 4 }}>Profile</h1>
         <p style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-2)" }}>Manage your account, API connections, and security</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, alignItems: "start" }}>
+      <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, alignItems: "start" }}>
         {/* Avatar card */}
         <div className="profile-card" style={{
           background: "var(--bg-surface)", border: "1px solid var(--border)",

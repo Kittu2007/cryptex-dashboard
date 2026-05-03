@@ -176,7 +176,7 @@ export default function NewsView() {
   const total     = allNews.length;
 
   return (
-    <div style={{ padding: "24px 28px" }}>
+    <div className="page-wrap" style={{ padding: "24px 28px" }}>
       <div ref={headerRef}>
 
         {/* ── Header ── */}
@@ -196,7 +196,7 @@ export default function NewsView() {
         </div>
 
         {/* ── Sentiment overview ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
+        <div className="news-stat-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
           {[
             { label: "Avg Score",    value: `${avgSent}`, sub: sentimentLabel(avgSent),   color: sentimentColor(avgSent) },
             { label: "Bullish",      value: `${bullCount}`, sub: `${Math.round(bullCount/total*100)}% of articles`, color: "var(--bull)" },
@@ -226,7 +226,7 @@ export default function NewsView() {
           borderRadius: 10, padding: "12px 18px", marginBottom: 16,
           display: "flex", alignItems: "center", gap: 14,
         }}>
-          <span className="section-label" style={{ flexShrink: 0, minWidth: 130 }}>MARKET SENTIMENT</span>
+          <span className="section-label news-sent-label" style={{ flexShrink: 0, minWidth: 130 }}>MARKET SENTIMENT</span>
           <div style={{ flex: 1, height: 8, background: "var(--bg-raised)", borderRadius: 4, overflow: "hidden", display: "flex", gap: 2 }}>
             <div style={{ width: `${bullCount/total*100}%`, height: "100%", background: "var(--bull)", borderRadius: "4px 0 0 4px", transition: "width 0.5s" }} />
             <div style={{ width: `${neutCount/total*100}%`, height: "100%", background: "var(--accent)", transition: "width 0.5s" }} />
@@ -317,7 +317,7 @@ export default function NewsView() {
       </div>
 
       {/* ── 2-column layout ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 256px", gap: 16, alignItems: "start" }}>
+      <div className="news-main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 256px", gap: 16, alignItems: "start" }}>
 
         {/* Left: featured + grid */}
         <div ref={cardsRef}>
@@ -396,7 +396,7 @@ export default function NewsView() {
               )}
 
               {/* ── Article grid ── */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className="news-article-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 {rest.map(item => {
                   const sentCol = sentimentColor(item.sentiment);
                   const catColor = CAT_COLOR[item.category] ?? "#6B7280";

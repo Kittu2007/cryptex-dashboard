@@ -256,8 +256,8 @@ export default function SettingsView() {
   ];
 
   return (
-    <div style={{ padding: "24px 28px", maxWidth: 780 }}>
-      <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+    <div className="page-wrap" style={{ padding: "24px 28px", maxWidth: 780 }}>
+      <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 10 }}>
         <div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--text-1)", marginBottom: 4 }}>Settings</h1>
           <p style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-2)" }}>Changes apply instantly across the entire dashboard</p>
@@ -291,7 +291,7 @@ export default function SettingsView() {
                 <Icon size={13} style={{ color: "var(--accent)" }} />
                 <span className="section-label">{section.label}</span>
               </div>
-              <span style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-3)" }}>{section.hint}</span>
+              <span className="settings-hint" style={{ fontFamily: "var(--font-ui)", fontSize: 10, color: "var(--text-3)" }}>{section.hint}</span>
             </div>
             {section.rows.map((row, ri) => (
               <SettingRow

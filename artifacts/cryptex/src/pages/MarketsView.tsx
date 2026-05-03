@@ -134,11 +134,11 @@ export default function MarketsView() {
   const losersCount  = filtered.length - gainersCount;
 
   return (
-    <div style={{ padding: "24px 28px" }}>
+    <div className="page-wrap" style={{ padding: "24px 28px" }}>
       <div ref={headerRef}>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div className="mkt-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--text-1)", marginBottom: 4 }}>
               Markets
@@ -164,7 +164,7 @@ export default function MarketsView() {
         </div>
 
         {/* Summary cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 14 }}>
+        <div className="mkt-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 14 }}>
           {marketSummary.map((s, i) => (
             <div key={i} style={{
               background: "var(--bg-surface)", border: "1px solid var(--border)",
@@ -250,7 +250,7 @@ export default function MarketsView() {
       </div>
 
       {/* Table */}
-      <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+      <div className="mkt-table-scroll-wrap" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
         <table className="market-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)" }}>

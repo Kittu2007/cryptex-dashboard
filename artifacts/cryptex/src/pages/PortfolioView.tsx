@@ -329,7 +329,7 @@ export default function PortfolioView() {
   ];
 
   return (
-    <div style={{ padding: "24px 28px" }}>
+    <div className="page-wrap" style={{ padding: "24px 28px" }}>
 
       {/* ── Header ── */}
       <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
@@ -348,7 +348,7 @@ export default function PortfolioView() {
       </div>
 
       {/* ── Stat cards ── */}
-      <div className="portfolio-card" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+      <div className="portfolio-card pf-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
         {statCards.map((s, i) => (
           <div key={i} style={{
             background: "var(--bg-surface)", border: "1px solid var(--border)",
@@ -381,7 +381,7 @@ export default function PortfolioView() {
 
       {/* ──────────── OVERVIEW ──────────── */}
       {activeTab === "Overview" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 296px", gap: 16, alignItems: "start" }}>
+        <div className="pf-overview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 296px", gap: 16, alignItems: "start" }}>
           {/* Left: chart + holdings */}
           <div>
             <PortfolioChart range={chartRange} setRange={setChartRange} />
@@ -630,7 +630,7 @@ export default function PortfolioView() {
 
       {/* ──────────── ANALYTICS ──────────── */}
       {activeTab === "Analytics" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="pf-analytics-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 
           {/* Trading stats */}
           <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px" }}>

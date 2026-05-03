@@ -170,9 +170,10 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
     if (!container) return;
     container.innerHTML = "";
 
+    const isMobileView = window.innerWidth <= 768;
     const chart = createChart(container, {
       width:  container.clientWidth,
-      height: 400,
+      height: isMobileView ? 240 : 400,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
         textColor:  "#5B5B7A",
@@ -329,7 +330,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
       </div>
 
       {/* ── Main 2-col grid ──────────────────────────────────────────────── */}
-      <div className="cd-main" style={{ display: "grid", gridTemplateColumns: "1fr 290px" }}>
+      <div className="cd-main cd-main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 290px" }}>
 
         {/* LEFT — chart + indicators + about + news */}
         <div style={{ borderRight: "1px solid var(--border)", minWidth: 0 }}>
@@ -432,7 +433,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
               <p style={{ fontFamily: "var(--font-ui)", fontSize: 12, color: "var(--text-2)", lineHeight: 1.75, marginBottom: 18 }}>
                 {info.about}
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              <div className="cd-about-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                 {[
                   { label: "Consensus",  value: info.consensus },
                   { label: "Throughput", value: info.tps       },
@@ -462,7 +463,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
               </span>
             </div>
             {relatedNews.length > 0 ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+              <div className="cd-news-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
                 {relatedNews.map(n => (
                   <div key={n.id} style={{
                     background: "var(--bg-surface)", border: "1px solid var(--border)",
