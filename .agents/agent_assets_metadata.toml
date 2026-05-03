@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Ujmk35F9ySX8dLatO5mZa"
+uri = "file://README.md"
+type = "text"
+title = "CRYPTEX — GitHub README"
