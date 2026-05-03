@@ -459,6 +459,14 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
 .cd-about-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
 .cd-news-grid  { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
 
+/* ── Watchlist grids ────────────────────────────────────────────────────── */
+.wl-stat-grid  { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.wl-cards-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+
+/* ── Portfolio analytics risk grid ─────────────────────────────────────── */
+.pf-risk-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
+.pf-risk-span { grid-column: span 2; }
+
 /* ── Markets table horizontal scroll ───────────────────────────────────── */
 .mkt-table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
 
@@ -482,6 +490,14 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   .mkt-summary-grid  { grid-template-columns: repeat(2,1fr) !important; }
   .news-stat-grid    { grid-template-columns: repeat(2,1fr) !important; }
   .pf-stat-grid      { grid-template-columns: repeat(2,1fr) !important; }
+  .wl-stat-grid      { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* Watchlist cards — 2-col → 1-col */
+  .wl-cards-grid { grid-template-columns: 1fr !important; }
+
+  /* Portfolio risk metrics — 5-col → 2-col, no span */
+  .pf-risk-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .pf-risk-span { grid-column: span 1 !important; }
 
   /* 2-col → single col */
   .pf-overview-grid   { grid-template-columns: 1fr !important; }

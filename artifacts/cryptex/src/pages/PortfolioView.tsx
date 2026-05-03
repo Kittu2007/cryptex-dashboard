@@ -745,12 +745,12 @@ export default function PortfolioView() {
           </div>
 
           {/* Risk metrics — full width */}
-          <div style={{
+          <div className="pf-risk-span" style={{
             background: "var(--bg-surface)", border: "1px solid var(--border)",
             borderRadius: 10, padding: "18px", gridColumn: "span 2",
           }}>
             <span className="section-label" style={{ display: "block", marginBottom: 14 }}>RISK METRICS</span>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+            <div className="pf-risk-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
               {[
                 { label: "Portfolio Beta",  value: "1.24",   desc: "Market sensitivity",   color: "var(--accent)", bar: 62 },
                 { label: "Sharpe Ratio",    value: "1.82",   desc: "Risk-adjusted return", color: "var(--bull)",   bar: 73 },

@@ -163,7 +163,7 @@ export default function WatchlistView() {
   }
 
   return (
-    <div style={{ padding: "24px 28px" }}>
+    <div className="page-wrap" style={{ padding: "24px 28px" }}>
       <div ref={headerRef}>
 
         {/* ── Header ── */}
@@ -271,7 +271,7 @@ export default function WatchlistView() {
         )}
 
         {/* ── Summary cards ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
+        <div className="wl-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
           {[
             { label: "Tracked Assets",  value: `${watched.length}`,                                                       color: "var(--text-1)"  },
             { label: "Gainers Today",   value: `${gainers} / ${watched.length}`,                                          color: "var(--bull)"    },
@@ -326,7 +326,7 @@ export default function WatchlistView() {
 
       {/* ══════════ GRID VIEW ══════════ */}
       {viewMode === "grid" && watched.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+        <div className="wl-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
           {watched.map(coin => {
             const lp        = livePrices[coin.symbol];
             const price     = lp?.price     ?? coin.price;
