@@ -64,8 +64,15 @@ export default function Dashboard() {
   const [livePrice,       setLivePrice]       = useState(INITIAL_PRICE);
   const [priceChange,     setPriceChange]     = useState(INITIAL_CHANGE);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [isMobile,        setIsMobile]        = useState(() => window.innerWidth <= 768);
   const livePriceRef = useRef(INITIAL_PRICE);
   const contentRef   = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (!settings.autoRefresh) return;
@@ -148,7 +155,7 @@ export default function Dashboard() {
     }
   }
 
-  const sidebarW = sidebarExpanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED;
+  const sidebarW = isMobile ? 0 : (sidebarExpanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-void)", transition: "background-color 0.3s ease" }}>

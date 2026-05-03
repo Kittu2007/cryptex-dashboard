@@ -369,8 +369,15 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
     align-items: flex-start !important;
   }
 
-  /* Chart area — taller than minimum for readability */
-  .chart-area-main { min-height: 260px !important; }
+  /* Chart panel — needs an explicit height when stacked so flex:1 works */
+  .chart-panel { min-height: 460px; }
+
+  /* Chart area — explicit height so lightweight-charts canvas fills it */
+  .chart-area-main {
+    flex: none !important;
+    height: 280px !important;
+    min-height: 280px !important;
+  }
 
   /* Table columns */
   .hide-mobile { display: none !important; }

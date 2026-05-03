@@ -374,7 +374,10 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
     // ── Resize observer ────────────────────────────────────────────────────
     const ro = new ResizeObserver(() => {
       if (chartRef.current && chartInst.current)
-        chartInst.current.applyOptions({ width: chartRef.current.clientWidth });
+        chartInst.current.applyOptions({
+          width:  chartRef.current.clientWidth,
+          height: chartRef.current.clientHeight || 220,
+        });
       ([
         [rsiRef, rsiInst], [macdRef, macdInst], [stochRef, stochInst],
       ] as [React.RefObject<HTMLDivElement | null>, React.RefObject<ReturnType<typeof createChart> | null>][]).forEach(([ref, inst]) => {
@@ -382,7 +385,8 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
           inst.current.applyOptions({ width: ref.current.clientWidth });
       });
     });
-    if (chartRef.current) ro.observe(chartRef.current);
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (chartRef.current)     ro.observe(chartRef.current);
 
     return () => {
       ro.disconnect();
@@ -470,7 +474,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+    <div ref={containerRef} className="chart-panel" style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
 
       {/* ── Controls toolbar ── */}
       <div className="chart-toolbar" style={{
@@ -781,7 +785,7 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
       </div>
 
       {/* ── Main chart ── */}
-      <div ref={chartRef} style={{ flex: 1, minHeight: 120, background: "var(--chart-bg)", overflow: "hidden" }} />
+      <div ref={chartRef} className="chart-area-main" style={{ flex: 1, minHeight: 120, background: "var(--chart-bg)", overflow: "hidden" }} />
 
       {/* ── RSI pane ── */}
       {hasRSI && (
