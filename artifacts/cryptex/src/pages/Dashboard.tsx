@@ -54,12 +54,16 @@ const mobileNavItems = [
   { icon: Newspaper,       label: "News",      id: "news"      as NavId },
 ];
 
+const SIDEBAR_COLLAPSED = 64;
+const SIDEBAR_EXPANDED  = 192;
+
 export default function Dashboard() {
   const { settings } = useApp();
-  const [activeNav,   setActiveNav]   = useState<NavId>("dashboard");
-  const [activeCoin,  setActiveCoin]  = useState<string | null>(null);
-  const [livePrice,   setLivePrice]   = useState(INITIAL_PRICE);
-  const [priceChange, setPriceChange] = useState(INITIAL_CHANGE);
+  const [activeNav,       setActiveNav]       = useState<NavId>("dashboard");
+  const [activeCoin,      setActiveCoin]      = useState<string | null>(null);
+  const [livePrice,       setLivePrice]       = useState(INITIAL_PRICE);
+  const [priceChange,     setPriceChange]     = useState(INITIAL_CHANGE);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const livePriceRef = useRef(INITIAL_PRICE);
   const contentRef   = useRef<HTMLDivElement>(null);
 
@@ -144,11 +148,18 @@ export default function Dashboard() {
     }
   }
 
+  const sidebarW = sidebarExpanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED;
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-void)", transition: "background-color 0.3s ease" }}>
-      <Sidebar active={activeNav} onNav={handleNav} />
+      <Sidebar
+        active={activeNav}
+        onNav={handleNav}
+        expanded={sidebarExpanded}
+        onToggle={() => setSidebarExpanded(v => !v)}
+      />
 
-      <div className="main-content" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <div className="main-content" style={{ display: "flex", flexDirection: "column", height: "100vh", marginLeft: sidebarW }}>
         <div style={{ flexShrink: 0 }}>
           <TopRibbon />
           <TickerTape />

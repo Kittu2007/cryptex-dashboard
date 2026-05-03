@@ -158,17 +158,17 @@ body {
 /* ── Layout ────────────────────────────────────────────────────────────────── */
 .sidebar {
   position: fixed; left: 0; top: 0; height: 100vh;
-  width: 64px; z-index: 40;
+  z-index: 40;
   background: var(--bg-surface);
   border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; align-items: center;
-  will-change: transform;
+  display: flex; flex-direction: column; align-items: stretch;
+  will-change: width;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .main-content {
-  margin-left: 64px;
   min-height: 100vh;
+  transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
 .top-ribbon {
