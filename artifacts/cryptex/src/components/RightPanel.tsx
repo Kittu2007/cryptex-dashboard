@@ -2,12 +2,27 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TrendingUp } from "lucide-react";
-import { portfolio } from "../mockData";
 import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ── AnimatedNumber: GSAP-tweened numeric display ──────────────────────────────
+// ── Coin position constants (fixed unit quantities at seed prices) ─────────────
+// Seed prices = initial mock prices; units = seeded value / seed price
+const SEED = { BTC: 67432.5, ETH: 3891.20, SOL: 182.40 };
+const UNITS = { BTC: 20554 / SEED.BTC, ETH: 12846 / SEED.ETH, SOL: 5995 / SEED.SOL };
+const COST  = { BTC: 20554 / 1.664, ETH: 12846 / 1.469, SOL: 5995 / 0.882 };
+const OTHER_VAL  = 3425;
+const OTHER_COST = OTHER_VAL / 1.103;
+
+// Four vivid, clearly distinguishable colors
+const HOLD_COLORS = {
+  BTC:   "#F59E0B",   // amber/gold
+  ETH:   "#60A5FA",   // electric blue
+  SOL:   "#34D399",   // emerald
+  Other: "#F472B6",   // hot pink
+};
+
+// ── AnimatedNumber ─────────────────────────────────────────────────────────────
 function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSize = 18 }: {
   value: number; prefix?: string; suffix?: string; decimals?: number; fontSize?: number;
 }) {
@@ -18,10 +33,7 @@ function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSiz
   useEffect(() => {
     const prev = prevRef.current;
     prevRef.current = value;
-    if (!elRef.current) return;
-    const diff = Math.abs(value - prev);
-    if (diff < 0.0001) return;
-
+    if (!elRef.current || Math.abs(value - prev) < 0.0001) return;
     const isUp = value >= prev;
     gsap.to({ v: prev }, {
       v: value, duration: 0.65, ease: "power2.out",
@@ -30,7 +42,6 @@ function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSiz
           elRef.current.textContent = prefix + (this.targets()[0].v as number).toFixed(decimals) + suffix;
       },
     });
-
     if (flashRef.current) {
       gsap.fromTo(flashRef.current,
         { opacity: 0.85, color: isUp ? "#34D399" : "#F87171" },
@@ -41,50 +52,34 @@ function AnimatedNumber({ value, prefix = "", suffix = "", decimals = 2, fontSiz
 
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      <span ref={flashRef} style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        fontFamily: "var(--font-display)", fontSize, fontWeight: 600,
-      }}>
+      <span ref={flashRef} style={{ position: "absolute", inset: 0, pointerEvents: "none", fontFamily: "var(--font-display)", fontSize, fontWeight: 600 }}>
         {prefix}{value.toFixed(decimals)}{suffix}
       </span>
-      <span ref={elRef} style={{
-        fontFamily: "var(--font-display)", fontSize, fontWeight: 600, color: "var(--text-1)",
-      }}>
+      <span ref={elRef} style={{ fontFamily: "var(--font-display)", fontSize, fontWeight: 600, color: "var(--text-1)" }}>
         {prefix}{value.toFixed(decimals)}{suffix}
       </span>
     </div>
   );
 }
 
-// ── LiveBar: GSAP-animated horizontal bar ────────────────────────────────────
+// ── LiveBar ────────────────────────────────────────────────────────────────────
 function LiveBar({ pct, color = "var(--accent)" }: { pct: number; color?: string }) {
   const fillRef = useRef<HTMLDivElement>(null);
-  const prevPct = useRef(pct);
+  const initPct = useRef(pct);
 
   useEffect(() => {
     if (!fillRef.current) return;
-    gsap.to(fillRef.current, {
-      width: `${Math.min(100, Math.max(0, pct))}%`,
-      duration: 0.8, ease: "power2.out",
-    });
-    prevPct.current = pct;
+    gsap.to(fillRef.current, { width: `${Math.min(100, Math.max(0, pct))}%`, duration: 0.8, ease: "power2.out" });
   }, [pct]);
 
   return (
     <div style={{ height: 3, background: "var(--bg-raised)", borderRadius: 2, overflow: "hidden" }}>
-      <div
-        ref={fillRef}
-        style={{
-          height: "100%",
-          width: `${Math.min(100, Math.max(0, prevPct.current))}%`,
-          background: color, borderRadius: 2,
-        }}
-      />
+      <div ref={fillRef} style={{ height: "100%", width: `${Math.min(100, Math.max(0, initPct.current))}%`, background: color, borderRadius: 2 }} />
     </div>
   );
 }
 
-// ── FearGreedGauge: animated dial + number ───────────────────────────────────
+// ── FearGreedGauge ─────────────────────────────────────────────────────────────
 function FearGreedGauge({ value }: { value: number }) {
   const dotRef  = useRef<HTMLDivElement>(null);
   const numRef  = useRef<HTMLSpanElement>(null);
@@ -93,82 +88,93 @@ function FearGreedGauge({ value }: { value: number }) {
   useEffect(() => {
     const prev = prevVal.current;
     prevVal.current = value;
-    const diff = Math.abs(value - prev);
-    if (diff < 0.5) return;
-
-    // Tween the dot position
-    if (dotRef.current) {
-      gsap.to(dotRef.current, {
-        left: `calc(${value}% - 4px)`,
-        duration: 0.8, ease: "power2.out",
-      });
-    }
-
-    // Count the number
+    if (Math.abs(value - prev) < 0.5) return;
+    if (dotRef.current)
+      gsap.to(dotRef.current, { left: `calc(${value}% - 4px)`, duration: 0.8, ease: "power2.out" });
     if (numRef.current) {
       const obj = { v: prev };
       gsap.to(obj, {
         v: value, duration: 0.7, ease: "power2.out",
-        onUpdate: () => {
-          if (numRef.current) numRef.current.textContent = String(Math.round(obj.v));
-        },
+        onUpdate: () => { if (numRef.current) numRef.current.textContent = String(Math.round(obj.v)); },
       });
-
-      // Flash color
-      const color = value > 60 ? "var(--bull)" : value < 40 ? "var(--bear)" : "var(--text-2)";
-      gsap.fromTo(numRef.current,
-        { opacity: 0.5 },
-        { opacity: 1, color, duration: 0.5, ease: "power2.out" }
-      );
+      const c = value > 60 ? "var(--bull)" : value < 40 ? "var(--bear)" : "var(--text-2)";
+      gsap.fromTo(numRef.current, { opacity: 0.5 }, { opacity: 1, color: c, duration: 0.5 });
     }
   }, [value]);
 
   const labelColor = value > 60 ? "var(--bull)" : value < 40 ? "var(--bear)" : "var(--text-2)";
-  const label      = value > 75 ? "Extreme Greed" : value > 60 ? "Greed" : value < 25 ? "Extreme Fear" : value < 40 ? "Fear" : "Neutral";
+  const label = value > 75 ? "Extreme Greed" : value > 60 ? "Greed" : value < 25 ? "Extreme Fear" : value < 40 ? "Fear" : "Neutral";
 
   return (
     <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
         <span className="section-label">FEAR &amp; GREED</span>
-        <span style={{
-          fontFamily: "var(--font-data)", fontSize: 9,
-          color: labelColor,
-          background: value > 60 ? "var(--bull-bg)" : value < 40 ? "var(--bear-bg)" : "transparent",
-          padding: "1px 6px", borderRadius: 3,
-          transition: "color 0.4s, background 0.4s",
-        }}>
+        <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: labelColor, background: value > 60 ? "var(--bull-bg)" : value < 40 ? "var(--bear-bg)" : "transparent", padding: "1px 6px", borderRadius: 3, transition: "color 0.4s, background 0.4s" }}>
           {label}
         </span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span
-          ref={numRef}
-          style={{
-            fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700,
-            color: labelColor, transition: "color 0.4s", minWidth: 34, display: "inline-block",
-          }}
-        >
+        <span ref={numRef} style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: labelColor, transition: "color 0.4s", minWidth: 34, display: "inline-block" }}>
           {value}
         </span>
-        {/* Gradient track + dot */}
         <div style={{ flex: 1, position: "relative", height: 4 }}>
-          <div style={{
-            height: 4, borderRadius: 2, overflow: "visible",
-            background: "linear-gradient(to right, #F87171, #EAB308, #34D399)",
-          }} />
-          <div
-            ref={dotRef}
-            style={{
-              width: 8, height: 8, borderRadius: "50%",
-              background: "var(--text-1)",
-              border: "1.5px solid var(--bg-surface)",
-              boxShadow: `0 0 6px ${labelColor}80`,
-              position: "absolute",
-              top: -2,
-              left: `calc(${value}% - 4px)`,
-            }}
-          />
+          <div style={{ height: 4, borderRadius: 2, background: "linear-gradient(to right, #F87171, #EAB308, #34D399)" }} />
+          <div ref={dotRef} style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--text-1)", border: "1.5px solid var(--bg-surface)", boxShadow: `0 0 6px ${labelColor}80`, position: "absolute", top: -2, left: `calc(${value}% - 4px)` }} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── HoldingRow — animated gainPct per tick ─────────────────────────────────────
+function HoldingRow({ symbol, color, allocation, gainPct }: {
+  symbol: string; color: string; allocation: number; gainPct: number;
+}) {
+  const gainRef = useRef<HTMLSpanElement>(null);
+  const allocRef = useRef<HTMLSpanElement>(null);
+  const prevGain  = useRef(gainPct);
+  const prevAlloc = useRef(allocation);
+
+  useEffect(() => {
+    const prev = prevGain.current;
+    prevGain.current = gainPct;
+    if (!gainRef.current || Math.abs(gainPct - prev) < 0.01) return;
+    const obj = { v: prev };
+    gsap.to(obj, {
+      v: gainPct, duration: 0.6, ease: "power2.out",
+      onUpdate: () => {
+        if (!gainRef.current) return;
+        const v = obj.v;
+        gainRef.current.textContent = `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
+        gainRef.current.style.color = v >= 0 ? "var(--bull)" : "var(--bear)";
+      },
+    });
+  }, [gainPct]);
+
+  useEffect(() => {
+    const prev = prevAlloc.current;
+    prevAlloc.current = allocation;
+    if (!allocRef.current || Math.abs(allocation - prev) < 0.05) return;
+    const obj = { v: prev };
+    gsap.to(obj, {
+      v: allocation, duration: 0.7, ease: "power2.out",
+      onUpdate: () => { if (allocRef.current) allocRef.current.textContent = `${obj.v.toFixed(1)}%`; },
+    });
+  }, [allocation]);
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ width: 10, height: 10, borderRadius: 3, background: color, flexShrink: 0, boxShadow: `0 0 6px ${color}60` }} />
+        <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)", fontWeight: 500 }}>{symbol}</span>
+      </div>
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <span ref={allocRef} style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", minWidth: 36, textAlign: "right" }}>
+          {allocation.toFixed(1)}%
+        </span>
+        <span ref={gainRef} style={{ fontFamily: "var(--font-data)", fontSize: 10, color: gainPct >= 0 ? "var(--bull)" : "var(--bear)", minWidth: 52, textAlign: "right" }}>
+          {gainPct >= 0 ? "+" : ""}{gainPct.toFixed(1)}%
+        </span>
       </div>
     </div>
   );
@@ -178,57 +184,91 @@ function FearGreedGauge({ value }: { value: number }) {
 export default function RightPanel() {
   const panelRef = useRef<HTMLDivElement>(null);
   const portRef  = useRef<HTMLSpanElement>(null);
+  const gainRef  = useRef<HTMLSpanElement>(null);
   const portPrev = useRef(0);
+  const gainPrev = useRef(0);
 
   const { formatPrice, liveMarket, livePrices } = useApp();
-  const btc = livePrices["BTC"];
 
   useEffect(() => {
     gsap.from(panelRef.current, { x: 20, opacity: 0, duration: 0.6, ease: "expo.out", delay: 0.6 });
   }, []);
 
-  // Live portfolio value (scales with BTC price)
-  const btcPrice     = btc?.price ?? 67432.5;
-  const livePortfolio = btcPrice * (portfolio.totalValue / 67432.5);
+  // ── Compute live holdings from live prices ───────────────────────────────────
+  const btcPrice = livePrices["BTC"]?.price ?? SEED.BTC;
+  const ethPrice = livePrices["ETH"]?.price ?? SEED.ETH;
+  const solPrice = livePrices["SOL"]?.price ?? SEED.SOL;
 
-  // Animate portfolio value on every BTC tick
+  const btcVal   = UNITS.BTC * btcPrice;
+  const ethVal   = UNITS.ETH * ethPrice;
+  const solVal   = UNITS.SOL * solPrice;
+  const totalVal = btcVal + ethVal + solVal + OTHER_VAL;
+
+  const btcAlloc   = (btcVal   / totalVal) * 100;
+  const ethAlloc   = (ethVal   / totalVal) * 100;
+  const solAlloc   = (solVal   / totalVal) * 100;
+  const otherAlloc = (OTHER_VAL / totalVal) * 100;
+
+  const btcGainPct   = ((btcVal   - COST.BTC)  / COST.BTC)  * 100;
+  const ethGainPct   = ((ethVal   - COST.ETH)  / COST.ETH)  * 100;
+  const solGainPct   = ((solVal   - COST.SOL)  / COST.SOL)  * 100;
+  const otherGainPct = ((OTHER_VAL - OTHER_COST) / OTHER_COST) * 100;
+
+  const totalCost    = COST.BTC + COST.ETH + COST.SOL + OTHER_COST;
+  const totalGain    = totalVal - totalCost;
+  const totalGainPct = (totalGain / totalCost) * 100;
+
+  // ── Animate portfolio total ──────────────────────────────────────────────────
   useEffect(() => {
     if (!portRef.current) return;
-    const prev = portPrev.current || livePortfolio;
-    portPrev.current = livePortfolio;
-    if (Math.abs(livePortfolio - prev) < 0.01) return;
-
+    const prev = portPrev.current || totalVal;
+    portPrev.current = totalVal;
+    if (Math.abs(totalVal - prev) < 0.01) return;
     const obj = { v: prev };
     gsap.to(obj, {
-      v: livePortfolio, duration: 0.7, ease: "power2.out",
-      onUpdate: () => {
-        if (portRef.current) portRef.current.textContent = formatPrice(obj.v);
-      },
+      v: totalVal, duration: 0.7, ease: "power2.out",
+      onUpdate: () => { if (portRef.current) portRef.current.textContent = formatPrice(obj.v); },
     });
-
-    const isUp = livePortfolio > prev;
     gsap.fromTo(portRef.current,
-      { color: isUp ? "#34D399" : "#F87171" },
+      { color: totalVal > prev ? "#34D399" : "#F87171" },
       { color: "var(--text-1)", duration: 1, ease: "power2.out" }
     );
-  }, [livePortfolio]);
+  }, [totalVal]);
 
-  // Donut
+  // ── Animate total gain ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!gainRef.current) return;
+    const prev = gainPrev.current || totalGainPct;
+    gainPrev.current = totalGainPct;
+    if (Math.abs(totalGainPct - prev) < 0.001) return;
+    const obj = { v: prev };
+    gsap.to(obj, {
+      v: totalGainPct, duration: 0.7, ease: "power2.out",
+      onUpdate: () => {
+        if (gainRef.current)
+          gainRef.current.textContent = `+${formatPrice(totalGain)} (+${obj.v.toFixed(1)}%)`;
+      },
+    });
+  }, [totalGainPct]);
+
+  // ── Donut segments (reactive to live allocations) ────────────────────────────
   const size = 120, cx = 60, cy = 60, r = 42;
   const circumference = 2 * Math.PI * r;
+  const liveHoldings = [
+    { symbol: "BTC",   allocation: btcAlloc,   gainPct: btcGainPct,   color: HOLD_COLORS.BTC },
+    { symbol: "ETH",   allocation: ethAlloc,   gainPct: ethGainPct,   color: HOLD_COLORS.ETH },
+    { symbol: "SOL",   allocation: solAlloc,   gainPct: solGainPct,   color: HOLD_COLORS.SOL },
+    { symbol: "Other", allocation: otherAlloc, gainPct: otherGainPct, color: HOLD_COLORS.Other },
+  ];
   let accumulated = 0;
-  const segments = portfolio.holdings.map(h => {
+  const segments = liveHoldings.map(h => {
     const dashArray  = (h.allocation / 100) * circumference;
     const dashOffset = circumference - accumulated * circumference / 100;
     accumulated += h.allocation;
     return { ...h, dashArray, dashOffset };
   });
 
-  const dominanceColor = liveMarket.btcDominance > 55
-    ? "var(--accent)"
-    : liveMarket.btcDominance < 45
-    ? "var(--bear)"
-    : "var(--accent)";
+  const dominanceColor = liveMarket.btcDominance > 55 ? "var(--accent)" : liveMarket.btcDominance < 45 ? "var(--bear)" : "var(--accent)";
 
   return (
     <div ref={panelRef} className="right-panel" style={{
@@ -237,7 +277,7 @@ export default function RightPanel() {
       transition: "background-color 0.3s ease",
     }}>
 
-      {/* ── Market Stats ── */}
+      {/* ── Market Stats header ── */}
       <span className="section-label" style={{ display: "block", marginBottom: 2 }}>MARKET STATS</span>
 
       {/* Market Cap */}
@@ -263,45 +303,30 @@ export default function RightPanel() {
           </span>
         </div>
         <AnimatedNumber value={liveMarket.volume24h} suffix="B" decimals={1} />
-        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>
-          Across all pairs
-        </div>
+        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>Across all pairs</div>
       </div>
 
       {/* Circulating */}
       <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ marginBottom: 4 }}>
-          <span className="section-label">CIRCULATING</span>
-        </div>
+        <div style={{ marginBottom: 4 }}><span className="section-label">CIRCULATING</span></div>
         <AnimatedNumber value={19.67} suffix="M" decimals={2} />
-        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>
-          of 21M max supply
-        </div>
+        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>of 21M max supply</div>
       </div>
 
       {/* All Time High */}
       <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ marginBottom: 4 }}>
-          <span className="section-label">ALL TIME HIGH</span>
-        </div>
+        <div style={{ marginBottom: 4 }}><span className="section-label">ALL TIME HIGH</span></div>
         <span style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-1)", fontWeight: 600 }}>
           {formatPrice(73750)}
         </span>
-        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>
-          Mar 14, 2024
-        </div>
+        <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>Mar 14, 2024</div>
       </div>
 
-      {/* ── BTC Dominance (GSAP bar) ── */}
+      {/* BTC Dominance */}
       <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
           <span className="section-label">BTC DOMINANCE</span>
-          <AnimatedNumber
-            value={liveMarket.btcDominance}
-            suffix="%"
-            decimals={1}
-            fontSize={11}
-          />
+          <AnimatedNumber value={liveMarket.btcDominance} suffix="%" decimals={1} fontSize={11} />
         </div>
         <LiveBar pct={liveMarket.btcDominance} color={dominanceColor} />
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
@@ -310,34 +335,28 @@ export default function RightPanel() {
         </div>
       </div>
 
-      {/* ── Fear & Greed (GSAP gauge) ── */}
+      {/* Fear & Greed */}
       <FearGreedGauge value={liveMarket.fearGreed} />
 
       {/* ── Portfolio Snapshot ── */}
       <div style={{ marginTop: 16 }}>
         <span className="section-label" style={{ display: "block", marginBottom: 8 }}>YOUR PORTFOLIO</span>
 
-        <div style={{ marginBottom: 4 }}>
-          <span
-            ref={portRef}
-            style={{
-              fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600,
-              color: "var(--text-1)", display: "inline-block",
-            }}
-          >
-            {formatPrice(livePortfolio)}
+        <div style={{ marginBottom: 3 }}>
+          <span ref={portRef} style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--text-1)", display: "inline-block" }}>
+            {formatPrice(totalVal)}
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
           <TrendingUp size={11} style={{ color: "var(--bull)" }} />
-          <span style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--bull)" }}>
-            +{formatPrice(portfolio.totalGain)} (+{portfolio.totalGainPct}%)
+          <span ref={gainRef} style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--bull)" }}>
+            +{formatPrice(totalGain)} (+{totalGainPct.toFixed(1)}%)
           </span>
         </div>
 
-        {/* Donut */}
-        <div style={{ display: "flex", justifyContent: "center", margin: "14px 0 10px" }}>
+        {/* Donut — reactive to live allocations */}
+        <div style={{ display: "flex", justifyContent: "center", margin: "12px 0 8px" }}>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-raised)" strokeWidth="14" />
             {segments.map((seg, i) => (
@@ -346,36 +365,35 @@ export default function RightPanel() {
                 fill="none" stroke={seg.color} strokeWidth="14"
                 strokeDasharray={`${seg.dashArray} ${circumference - seg.dashArray}`}
                 strokeDashoffset={seg.dashOffset * -1}
-                style={{ transformOrigin: `${cx}px ${cy}px` }}
+                style={{ transformOrigin: `${cx}px ${cy}px`, transition: "stroke-dasharray 0.7s ease, stroke-dashoffset 0.7s ease" }}
               />
             ))}
-            <text x={cx} y={cy - 4} textAnchor="middle" fill="var(--text-2)" fontSize="8" fontFamily="var(--font-ui)">PORTFOLIO</text>
-            <text x={cx} y={cy + 9} textAnchor="middle" fill="var(--text-1)" fontSize="10" fontFamily="var(--font-display)" fontWeight="600">
-              {formatPrice(livePortfolio, true)}
+            <text x={cx} y={cy - 5} textAnchor="middle" fill="var(--text-3)" fontSize="7" fontFamily="var(--font-ui)" letterSpacing="0.08em">PORTFOLIO</text>
+            <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--text-1)" fontSize="10" fontFamily="var(--font-display)" fontWeight="700">
+              {formatPrice(totalVal, true)}
             </text>
           </svg>
         </div>
 
-        {/* Holdings breakdown */}
-        {portfolio.holdings.map((h, i) => (
-          <div key={i} style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0",
-            borderBottom: i < portfolio.holdings.length - 1 ? "1px solid rgba(31,31,46,0.35)" : "none",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: h.color, flexShrink: 0 }} />
-              <span style={{ fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-2)" }}>{h.symbol}</span>
+        {/* Color legend */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+          {liveHoldings.map(h => (
+            <div key={h.symbol} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 7, height: 7, borderRadius: 2, background: h.color, boxShadow: `0 0 5px ${h.color}70` }} />
+              <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)" }}>{h.symbol}</span>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)" }}>{h.allocation}%</span>
-              <span style={{
-                fontFamily: "var(--font-data)", fontSize: 10,
-                color: h.gainPct >= 0 ? "var(--bull)" : "var(--bear)",
-              }}>
-                {h.gainPct >= 0 ? "+" : ""}{h.gainPct}%
-              </span>
-            </div>
-          </div>
+          ))}
+        </div>
+
+        {/* Holdings rows — each animates independently */}
+        {liveHoldings.map(h => (
+          <HoldingRow
+            key={h.symbol}
+            symbol={h.symbol}
+            color={h.color}
+            allocation={h.allocation}
+            gainPct={h.gainPct}
+          />
         ))}
       </div>
     </div>
