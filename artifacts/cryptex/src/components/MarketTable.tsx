@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "./Sparkline";
+import { useApp } from "../context/AppContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,11 +31,10 @@ export default function MarketTable() {
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("marketCap");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const { formatPrice } = useApp();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
+    const timer = setTimeout(() => setLoading(false), 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -49,12 +49,8 @@ export default function MarketTable() {
   }, [loading]);
 
   function handleSort(key: SortKey) {
-    if (sortKey === key) {
-      setSortDir(d => d === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDir("desc");
-    }
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDir("desc"); }
   }
 
   const sorted = [...coins].sort((a, b) => {
@@ -74,27 +70,20 @@ export default function MarketTable() {
         ? sortDir === "desc"
           ? <ChevronDown size={10} style={{ color: "var(--accent)" }} />
           : <ChevronUp size={10} style={{ color: "var(--accent)" }} />
-        : <ChevronDown size={10} style={{ color: "var(--text-3)", opacity: 0.4 }} />
-      }
+        : <ChevronDown size={10} style={{ color: "var(--text-3)", opacity: 0.4 }} />}
     </span>
   );
 
   const thStyle = (key?: SortKey): React.CSSProperties => ({
-    fontFamily: "var(--font-ui)",
-    fontSize: 8,
-    fontWeight: 600,
-    letterSpacing: "0.15em",
-    textTransform: "uppercase" as const,
+    fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
+    letterSpacing: "0.15em", textTransform: "uppercase" as const,
     color: sortKey === key ? "var(--text-2)" : "var(--text-3)",
-    padding: "10px 0",
-    cursor: key ? "pointer" : "default",
-    userSelect: "none",
-    whiteSpace: "nowrap" as const
+    padding: "10px 0", cursor: key ? "pointer" : "default",
+    userSelect: "none", whiteSpace: "nowrap" as const
   });
 
   const SignalPill = ({ signal }: { signal: string }) => {
-    const isBull = signal === "Bullish";
-    const isBear = signal === "Bearish";
+    const isBull = signal === "Bullish", isBear = signal === "Bearish";
     return (
       <span style={{
         fontFamily: "var(--font-ui)", fontSize: 9,
@@ -140,8 +129,7 @@ export default function MarketTable() {
                 </tr>
               ))
             : sorted.map((coin, i) => {
-                const is24Up = coin.change24h >= 0;
-                const is7Up = coin.change7d >= 0;
+                const is24Up = coin.change24h >= 0, is7Up = coin.change7d >= 0;
                 return (
                   <tr key={coin.id} className="mkt-row" style={{ borderBottom: "1px solid rgba(31,31,46,0.4)" }}>
                     <td style={{ padding: "10px 0 10px", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)", paddingRight: 16 }}>
@@ -151,27 +139,21 @@ export default function MarketTable() {
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{
                           width: 28, height: 28, borderRadius: "50%",
-                          background: coin.avatar + "20",
-                          border: `1px solid ${coin.avatar}40`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0
+                          background: coin.avatar + "20", border: `1px solid ${coin.avatar}40`,
+                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
                         }}>
                           <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 600, color: coin.avatar }}>
                             {coin.symbol[0]}
                           </span>
                         </div>
                         <div>
-                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}>
-                            {coin.name}
-                          </div>
-                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>
-                            {coin.symbol}
-                          </div>
+                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}>{coin.name}</div>
+                          <div style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-2)" }}>{coin.symbol}</div>
                         </div>
                       </div>
                     </td>
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", paddingRight: 16 }}>
-                      ${coin.price < 1 ? coin.price.toFixed(3) : coin.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatPrice(coin.price)}
                     </td>
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is24Up ? "var(--bull)" : "var(--bear)", paddingRight: 16 }}>
                       {is24Up ? "+" : "−"}{Math.abs(coin.change24h).toFixed(1)}%
@@ -190,13 +172,10 @@ export default function MarketTable() {
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
                       ${coin.volume}
                     </td>
-                    <td align="right">
-                      <SignalPill signal={coin.signal} />
-                    </td>
+                    <td align="right"><SignalPill signal={coin.signal} /></td>
                   </tr>
                 );
-              })
-          }
+              })}
         </tbody>
       </table>
     </div>

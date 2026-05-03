@@ -14,6 +14,7 @@ import WatchlistView from "./WatchlistView";
 import NewsView from "./NewsView";
 import SettingsView from "./SettingsView";
 import ProfileView from "./ProfileView";
+import { useApp, REFRESH_MS } from "../context/AppContext";
 import { LayoutDashboard, TrendingUp, Briefcase, Star, Newspaper } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -48,6 +49,7 @@ const mobileNavItems = [
 ];
 
 export default function Dashboard() {
+  const { settings } = useApp();
   const [activeNav, setActiveNav] = useState<NavId>("dashboard");
   const [livePrice, setLivePrice] = useState(INITIAL_PRICE);
   const [priceChange, setPriceChange] = useState(INITIAL_CHANGE);
@@ -55,6 +57,9 @@ export default function Dashboard() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!settings.autoRefresh) return;
+
+    const intervalMs = REFRESH_MS[settings.refreshRate];
     const interval = setInterval(() => {
       const delta = (Math.random() - 0.488) * 60;
       const newPrice = livePriceRef.current + delta;
@@ -63,14 +68,29 @@ export default function Dashboard() {
       if (el) {
         gsap.to(el, {
           color: delta > 0 ? "#34D399" : "#F87171", duration: 0.1,
-          onComplete: () => gsap.to(el, { color: "#E8E6F0", duration: 0.8 })
+          onComplete: () => gsap.to(el, { color: "var(--text-1)", duration: 0.8 })
         });
+      }
+      // Sound alert on large moves
+      if (settings.soundAlerts && Math.abs(delta) > 40) {
+        try {
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = delta > 0 ? 880 : 440;
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.2);
+        } catch { /* AudioContext not available */ }
       }
       setLivePrice(newPrice);
       setPriceChange(prev => prev + delta * 0.0008);
-    }, 3000);
+    }, intervalMs);
     return () => clearInterval(interval);
-  }, []);
+  }, [settings.autoRefresh, settings.refreshRate, settings.soundAlerts]);
 
   function handleNav(id: NavId) {
     if (id === activeNav) return;
@@ -92,7 +112,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-void)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-void)", transition: "background-color 0.3s ease" }}>
       <Sidebar active={activeNav} onNav={handleNav} />
 
       <div className="main-content" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -111,6 +131,19 @@ export default function Dashboard() {
           {activeNav === "profile"    && <ProfileView />}
         </div>
       </div>
+
+      {!settings.autoRefresh && (
+        <div style={{
+          position: "fixed", bottom: 72, right: 16, zIndex: 100,
+          background: "var(--bear-bg)", border: "1px solid var(--bear)",
+          borderRadius: 6, padding: "6px 12px",
+          fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--bear)",
+          display: "flex", alignItems: "center", gap: 6
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--bear)", display: "inline-block" }} />
+          Live prices paused
+        </div>
+      )}
 
       <nav className="bottom-nav">
         {mobileNavItems.map(({ icon: Icon, label, id }) => (

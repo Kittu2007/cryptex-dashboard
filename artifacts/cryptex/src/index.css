@@ -24,7 +24,28 @@
   --font-display: 'Sora', sans-serif;
   --font-ui:     'Inter', sans-serif;
   --font-data:   'JetBrains Mono', monospace;
+  --base-font-size: 13px;
 }
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --bg-void:     #F0F0F5;
+  --bg-surface:  #FFFFFF;
+  --bg-raised:   #F5F5FA;
+  --bg-hover:    #EDEDF5;
+  --border:      #E0DFF0;
+  --border-2:    #C8C6E0;
+  --text-1:      #1A1828;
+  --text-2:      #6B6882;
+  --text-3:      #A09CB8;
+  --chart-bg:    #F8F8FC;
+  --chart-grid:  #EDEDF5;
+}
+
+/* Compact mode */
+[data-compact="true"] .chart-area { height: 200px !important; }
+[data-compact="true"] .top-ribbon { height: 34px !important; }
+[data-compact="true"] td, [data-compact="true"] th { padding-top: 6px !important; padding-bottom: 6px !important; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,9 +53,11 @@ body {
   background-color: var(--bg-void);
   color: var(--text-1);
   font-family: var(--font-ui);
+  font-size: var(--base-font-size);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .font-display { font-family: var(--font-display); }
@@ -103,6 +126,7 @@ body {
   background: var(--bg-surface);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column; align-items: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .main-content {
@@ -116,6 +140,7 @@ body {
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Nav icon active state */
@@ -131,6 +156,7 @@ body {
 
 /* Chart container */
 .chart-container { position: relative; }
+.chart-area { transition: height 0.3s ease; }
 
 /* Table */
 .market-table th,
