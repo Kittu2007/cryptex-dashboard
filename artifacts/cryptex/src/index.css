@@ -377,6 +377,12 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   /* Ribbon */
   .ribbon-mid { display: none !important; }
 
+  /* Ribbon — compact controls so everything fits in 40px bar */
+  .ribbon-pair-text    { font-size: 12px !important; }
+  .ribbon-live-price   { font-size: 12px !important; padding-left: 6px !important; }
+  .ribbon-currency-text { display: none !important; }
+  .ribbon-theme-toggle { display: none !important; }
+
   /* Chart toolbar wraps onto a second row */
   .chart-toolbar {
     flex-wrap: wrap !important;
@@ -417,6 +423,9 @@ button, a, .nav-icon-wrap, .coin-tab, .range-tab {
   .chart-controls-wrap { gap: 3px !important; }
   .hide-xs { display: none !important; }
   :root { --base-font-size: 13px; }
+
+  /* Ribbon — hide wallet on tiny screens */
+  .ribbon-wallet-wrap { display: none !important; }
 
   /* Chart area slightly shorter on very small phones */
   .chart-area-main {

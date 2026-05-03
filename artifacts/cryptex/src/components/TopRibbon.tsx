@@ -128,6 +128,7 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
 
         {/* Pair button */}
         <button
+          className="ribbon-pair-btn"
           onClick={() => { setDropOpen(v => !v); setWalletMenu(false); }}
           style={{
             display: "flex", alignItems: "center", gap: 4,
@@ -137,7 +138,7 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
             transition: "all 0.15s",
           }}
         >
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+          <span className="ribbon-pair-text" style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
             {activePair} / {settings.currency}
           </span>
           <ChevronDown size={11} style={{
@@ -198,7 +199,7 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
         )}
 
         {/* Live price */}
-        <span ref={priceRef} style={{
+        <span ref={priceRef} className="ribbon-live-price" style={{
           fontFamily: "var(--font-data)", fontSize: 15, color: "var(--text-1)", fontWeight: 500,
           borderLeft: "1px solid var(--border)", paddingLeft: 10,
         }}>
@@ -257,11 +258,12 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
           onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-dim)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)"; }}
         >
           <span style={{ fontSize: 11 }}>{CURRENCY_SYMBOLS[settings.currency]}</span>
-          {settings.currency}
+          <span className="ribbon-currency-text">{settings.currency}</span>
         </button>
 
         {/* Theme toggle */}
         <button
+          className="ribbon-theme-toggle"
           onClick={toggleTheme}
           title={isDark ? "Switch to Light mode" : "Switch to Dark mode"}
           style={{
@@ -287,7 +289,7 @@ export default function TopRibbon({ onMenuOpen }: { onMenuOpen?: () => void }) {
       </div>
 
       {/* ── Connect Wallet ── */}
-      <div ref={walletRef} style={{ marginLeft: 10, position: "relative" }}>
+      <div ref={walletRef} className="ribbon-wallet-wrap" style={{ marginLeft: 10, position: "relative" }}>
         {connected ? (
           <button
             onClick={() => { setWalletMenu(v => !v); setDropOpen(false); }}
