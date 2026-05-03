@@ -26,6 +26,20 @@ const sparkData = coins.reduce((acc, c) => {
   return acc;
 }, {} as Record<string, number[]>);
 
+function parseBillions(s: string): number {
+  const v = parseFloat(s);
+  if (s.endsWith("T")) return v * 1000;
+  if (s.endsWith("B")) return v;
+  if (s.endsWith("M")) return v / 1000;
+  return v;
+}
+
+function formatBillions(b: number): string {
+  if (b >= 1000) return `${(b / 1000).toFixed(2)}T`;
+  if (b >= 1)    return `${b.toFixed(1)}B`;
+  return `${(b * 1000).toFixed(0)}M`;
+}
+
 export default function MarketTable() {
   const tableRef = useRef<HTMLDivElement>(null);
   const rowsRef = useRef<HTMLTableSectionElement>(null);
@@ -160,10 +174,13 @@ export default function MarketTable() {
               ))
             : sorted.map((coin, i) => {
                 const lp = livePrices[coin.symbol];
-                const livePrice = lp?.price ?? coin.price;
-                const liveChange = lp?.change24h ?? coin.change24h;
-                const is24Up = liveChange >= 0;
-                const is7Up = coin.change7d >= 0;
+                const livePrice   = lp?.price      ?? coin.price;
+                const liveChange  = lp?.change24h  ?? coin.change24h;
+                const liveChange7d = lp?.change7d  ?? coin.change7d;
+                const liveMktCapB  = lp?.marketCapB ?? parseBillions(coin.marketCap);
+                const liveVolumeB  = lp?.volumeB    ?? parseBillions(coin.volume);
+                const is24Up = liveChange   >= 0;
+                const is7Up  = liveChange7d >= 0;
                 return (
                   <tr key={coin.id} className="mkt-row" style={{
                     borderBottom: "1px solid rgba(31,31,46,0.4)",
@@ -203,15 +220,15 @@ export default function MarketTable() {
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
                         <Sparkline data={sparkData[coin.id]} width={50} height={22} />
                         <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: is7Up ? "var(--bull)" : "var(--bear)", minWidth: 42, textAlign: "right" }}>
-                          {is7Up ? "+" : "−"}{Math.abs(coin.change7d).toFixed(1)}%
+                          {is7Up ? "+" : "−"}{Math.abs(liveChange7d).toFixed(1)}%
                         </span>
                       </div>
                     </td>
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
-                      ${coin.marketCap}
+                      ${formatBillions(liveMktCapB)}
                     </td>
                     <td align="right" style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-2)", paddingRight: 16 }}>
-                      ${coin.volume}
+                      ${formatBillions(liveVolumeB)}
                     </td>
                     <td align="right"><SignalPill signal={coin.signal} change={liveChange} /></td>
                   </tr>

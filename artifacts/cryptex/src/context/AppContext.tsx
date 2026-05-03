@@ -50,6 +50,12 @@ export interface LiveCoinPrice {
   price: number;
   change24h: number;
   prevPrice: number;
+  change7d: number;
+  marketCapB: number;
+  volumeB: number;
+  seedPrice: number;
+  seedMktCapB: number;
+  seedVolumeB: number;
 }
 
 export interface LiveMarketStats {
@@ -103,15 +109,35 @@ const profileDefaults: Profile = {
   timezone: "UTC+5:30",
 };
 
+function parseBillions(s: string): number {
+  const v = parseFloat(s);
+  if (s.endsWith("T")) return v * 1000;
+  if (s.endsWith("B")) return v;
+  if (s.endsWith("M")) return v / 1000;
+  return v;
+}
+
 // Initial live prices seeded from mockData
 function seedLivePrices(): Record<string, LiveCoinPrice> {
   const out: Record<string, LiveCoinPrice> = {};
   for (const c of coins) {
-    out[c.symbol] = { symbol: c.symbol, price: c.price, change24h: c.change24h, prevPrice: c.price };
+    const seedMktCapB = parseBillions(c.marketCap);
+    const seedVolumeB = parseBillions(c.volume);
+    out[c.symbol] = {
+      symbol: c.symbol, price: c.price, change24h: c.change24h, prevPrice: c.price,
+      change7d: c.change7d,
+      marketCapB: seedMktCapB, volumeB: seedVolumeB,
+      seedPrice: c.price, seedMktCapB, seedVolumeB,
+    };
   }
-  // Extra coins for ticker
-  out["AVAX"] = { symbol: "AVAX", price: 42.80, change24h: 5.2, prevPrice: 42.80 };
-  out["INJ"] = { symbol: "INJ", price: 28.40, change24h: 18.4, prevPrice: 28.40 };
+  // Extra coins for ticker only (no market table entry)
+  const mkExtra = (symbol: string, price: number, change24h: number, change7d: number, mktCapB: number, volB: number): LiveCoinPrice => ({
+    symbol, price, change24h, prevPrice: price, change7d,
+    marketCapB: mktCapB, volumeB: volB,
+    seedPrice: price, seedMktCapB: mktCapB, seedVolumeB: volB,
+  });
+  out["AVAX"] = mkExtra("AVAX", 42.80, 5.2, 9.4, 17.6, 0.6);
+  out["INJ"]  = mkExtra("INJ",  28.40, 18.4, 24.1, 6.8, 0.3);
   return out;
 }
 
@@ -167,11 +193,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
           const delta = (Math.random() - 0.488) * coin.price * vol;
           const newPrice = Math.max(coin.price + delta, coin.price * 0.5);
           const changeUpdate = delta / coin.price * 100;
+          // Market cap scales with price ratio from seed
+          const newMktCapB = coin.seedMktCapB * (newPrice / coin.seedPrice);
+          // Volume drifts ±1.5% per tick around seed volume
+          const volDrift = (Math.random() - 0.49) * coin.seedVolumeB * 0.015;
+          const newVolumeB = Math.max(coin.seedVolumeB * 0.4, coin.volumeB + volDrift);
+          // 7D change drifts slowly ±0.03% per tick
+          const new7d = parseFloat((coin.change7d + (Math.random() - 0.5) * 0.06).toFixed(2));
           next[sym] = {
             ...coin,
             prevPrice: coin.price,
             price: newPrice,
             change24h: parseFloat((coin.change24h + changeUpdate * 0.08).toFixed(2)),
+            change7d: new7d,
+            marketCapB: newMktCapB,
+            volumeB: newVolumeB,
           };
         }
         return next;
