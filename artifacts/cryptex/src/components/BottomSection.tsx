@@ -41,7 +41,7 @@ function TransactionsCol() {
   }, [filter]);
 
   return (
-    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
 
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -81,7 +81,7 @@ function TransactionsCol() {
       </div>
 
       {/* Scrollable list */}
-      <div ref={listRef} style={{ flex: 1, overflowY: "auto", maxHeight: 240, marginRight: -4, paddingRight: 4 }}>
+      <div ref={listRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, marginRight: -4, paddingRight: 4 }}>
         {visible.map((tx, i) => {
           const isBuy     = tx.type === "BUY";
           const isPending = tx.status === "Pending";
@@ -203,7 +203,7 @@ function WatchlistCol() {
   }, [livePrices]);
 
   return (
-    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1 }}>
+    <div className="bottom-col" style={{ padding: "20px 24px", borderRight: "1px solid var(--border)", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <span className="section-label">WATCHLIST</span>
         <button style={{
@@ -215,7 +215,7 @@ function WatchlistCol() {
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {watchlist.map((coin, i) => {
           const lp     = livePrices[coin.symbol];
           const price  = lp?.price ?? coin.price;
@@ -296,30 +296,38 @@ function WatchlistCol() {
 function NewsCol() {
   const newsRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   useEffect(() => {
     const fills = newsRef.current?.querySelectorAll(".sentiment-fill");
     fills?.forEach((fill, i) => {
       gsap.from(fill, {
-        scaleX: 0, transformOrigin: "left", duration: 0.7, ease: "power2.out",
-        delay: 0.3 + i * 0.08,
+        scaleX: 0, transformOrigin: "left", duration: 0.65, ease: "power2.out",
+        delay: 0.2 + i * 0.07,
       });
     });
+    const cards = newsRef.current?.querySelectorAll(".news-card");
+    if (cards?.length) {
+      gsap.from(cards, { opacity: 0, y: 10, stagger: 0.06, duration: 0.4, ease: "power2.out", delay: 0.15 });
+    }
   }, []);
 
   const sentimentLabel = (s: number) => s >= 65 ? "Bullish" : s < 40 ? "Bearish" : "Neutral";
   const sentimentColor = (s: number) => s >= 65 ? "var(--bull)" : s < 40 ? "var(--bear)" : "var(--accent)";
+  const sentimentBg    = (s: number) => s >= 65 ? "var(--bull-bg)" : s < 40 ? "var(--bear-bg)" : "var(--accent-dim)";
 
   const avgSentiment = Math.round(news.reduce((s, n) => s + n.sentiment, 0) / news.length);
 
   return (
-    <div className="bottom-col" ref={newsRef} style={{ padding: "20px 24px", flex: 1 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+    <div className="bottom-col" ref={newsRef} style={{ padding: "20px 24px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexShrink: 0 }}>
         <span className="section-label">NEWS & SENTIMENT</span>
         <span style={{
           fontFamily: "var(--font-data)", fontSize: 9,
           color: sentimentColor(avgSentiment),
-          background: avgSentiment >= 65 ? "var(--bull-bg)" : avgSentiment < 40 ? "var(--bear-bg)" : "var(--accent-dim)",
+          background: sentimentBg(avgSentiment),
           padding: "2px 7px", borderRadius: 3
         }}>
           Market: {sentimentLabel(avgSentiment)} {avgSentiment}%
@@ -327,13 +335,12 @@ function NewsCol() {
       </div>
 
       {/* Aggregate sentiment bar */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: "flex", height: 3, borderRadius: 2, overflow: "hidden", gap: 1, marginBottom: 4 }}>
+      <div style={{ marginBottom: 12, flexShrink: 0 }}>
+        <div style={{ display: "flex", height: 4, borderRadius: 2, overflow: "hidden", gap: 2, marginBottom: 4 }}>
           {news.map((item, i) => (
             <div key={i} className="sentiment-fill" style={{
-              flex: 1, height: "100%",
-              background: sentimentColor(item.sentiment),
-              opacity: 0.7,
+              flex: 1, height: "100%", borderRadius: 2,
+              background: sentimentColor(item.sentiment), opacity: 0.75,
             }} />
           ))}
         </div>
@@ -343,39 +350,70 @@ function NewsCol() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, overflowY: "auto", maxHeight: 280 }}>
+      {/* News cards — scrollable, fills remaining space */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column", gap: 8 }}>
         {news.map((item, i) => {
           const isExpanded = expanded === i;
+          const isHovered  = hovered === i;
+          const accent     = sentimentColor(item.sentiment);
           return (
-            <div key={i} style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setExpanded(isExpanded ? null : i)}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontFamily: "var(--font-ui)", fontSize: 8, color: sentimentColor(item.sentiment), textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                  {item.source}
-                </span>
+            <div
+              key={i}
+              className="news-card"
+              onClick={() => setExpanded(isExpanded ? null : i)}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                flexShrink: 0, cursor: "pointer",
+                background: isHovered ? "var(--bg-hover)" : "var(--bg-raised)",
+                border: `1px solid ${isHovered ? accent + "55" : "var(--border)"}`,
+                borderLeft: `3px solid ${accent}`,
+                borderRadius: 8,
+                padding: "10px 12px",
+                transition: "background 0.15s, border-color 0.15s",
+              }}
+            >
+              {/* Source + time */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{
+                    fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 700,
+                    color: accent, textTransform: "uppercase", letterSpacing: "0.12em",
+                  }}>{item.source}</span>
+                  <span style={{
+                    fontFamily: "var(--font-ui)", fontSize: 8,
+                    color: "var(--accent)", background: "var(--accent-dim)",
+                    padding: "1px 5px", borderRadius: 3,
+                  }}>{item.category}</span>
+                </div>
                 <span style={{ fontFamily: "var(--font-ui)", fontSize: 9, color: "var(--text-3)" }}>{item.time}</span>
               </div>
+
+              {/* Headline */}
               <p style={{
                 fontFamily: "var(--font-ui)", fontSize: 11, color: "var(--text-1)",
-                lineHeight: 1.5, marginBottom: 6,
+                lineHeight: 1.5, margin: "0 0 8px",
                 display: "-webkit-box", WebkitLineClamp: isExpanded ? 99 : 2,
                 WebkitBoxOrient: "vertical", overflow: "hidden",
-                transition: "all 0.2s"
+                transition: "all 0.2s",
               }}>
                 {item.title}
               </p>
-              <div style={{ height: 2, background: "var(--border)", borderRadius: 1, marginBottom: 5, overflow: "hidden" }}>
-                <div className="sentiment-fill" style={{
-                  width: `${item.sentiment}%`, height: "100%",
-                  background: sentimentColor(item.sentiment), borderRadius: 1
-                }} />
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+
+              {/* Sentiment row */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ flex: 1, height: 3, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+                  <div className="sentiment-fill" style={{
+                    width: `${item.sentiment}%`, height: "100%",
+                    background: accent, borderRadius: 2,
+                  }} />
+                </div>
                 <span style={{
-                  fontFamily: "var(--font-ui)", fontSize: 8,
-                  color: "var(--accent)", background: "var(--accent-dim)",
-                  padding: "2px 6px", borderRadius: 3
-                }}>{item.category}</span>
-                <span style={{ fontFamily: "var(--font-data)", fontSize: 9, color: sentimentColor(item.sentiment) }}>
+                  fontFamily: "var(--font-data)", fontSize: 9, fontWeight: 600,
+                  color: accent,
+                  background: sentimentBg(item.sentiment),
+                  padding: "1px 6px", borderRadius: 3, flexShrink: 0,
+                }}>
                   {item.sentiment}% {sentimentLabel(item.sentiment)}
                 </span>
               </div>
