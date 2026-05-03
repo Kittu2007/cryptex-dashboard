@@ -97,6 +97,10 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
   const pickerRef   = useRef<HTMLDivElement>(null);
   const priceEl     = useRef<HTMLSpanElement>(null);
   const prevCoin    = useRef("");
+  // Live-update refs — hold the active price series and last candle without triggering rebuild
+  const priceSeriesRef   = useRef<any>(null);
+  const lastCandleRef    = useRef<any>(null);
+  const chartTypeRef     = useRef<ChartType>("Candlestick");
 
   const [activeRange,      setActiveRange]      = useState("1D");
   const [activeChartType,  setActiveChartType]  = useState<ChartType>("Candlestick");
@@ -220,6 +224,11 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
     setMaValues({ ma7: computeMA(candles, 7), ma25: computeMA(candles, 25), ma99: computeMA(candles, 99) });
     setTechInd(computeIndicators(candles));
 
+    // Track chart type for live updates
+    chartTypeRef.current = activeChartType;
+    priceSeriesRef.current = null;
+    lastCandleRef.current  = null;
+
     // Price series
     if (activeChartType === "Candlestick") {
       const s = chart.addSeries(CandlestickSeries, {
@@ -228,18 +237,26 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
         wickUpColor: "#34D399", wickDownColor: "#F87171",
       });
       s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
+      priceSeriesRef.current = s;
+      lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else if (activeChartType === "Bar") {
       const s = chart.addSeries(BarSeries, { upColor: "#34D399", downColor: "#F87171" });
       s.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
+      priceSeriesRef.current = s;
+      lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else if (activeChartType === "Line") {
       const s = chart.addSeries(LineSeries, { color: "#A78BFA", lineWidth: 2 });
       s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
+      priceSeriesRef.current = s;
+      lastCandleRef.current  = { ...candles[candles.length - 1] };
     } else {
       const s = chart.addSeries(AreaSeries, {
         lineColor: "#A78BFA", lineWidth: 2,
         topColor: "rgba(167,139,250,0.22)", bottomColor: "rgba(167,139,250,0.01)",
       });
       s.setData(candles.map(c => ({ time: c.time as any, value: c.close })));
+      priceSeriesRef.current = s;
+      lastCandleRef.current  = { ...candles[candles.length - 1] };
     }
 
     // Volume histogram
@@ -373,6 +390,36 @@ export default function ChartPanel({ livePrice: _lp, priceChange: _pc }: ChartPa
       });
     };
   }, [activePair, activeRange, activeChartType, settings.theme, indKey]);
+
+  // ── Live price → last candle update (no chart rebuild) ─────────────────────
+  useEffect(() => {
+    const series = priceSeriesRef.current;
+    const lc     = lastCandleRef.current;
+    if (!series || !lc) return;
+
+    const price       = coinPrice;
+    const updatedHigh = Math.max(lc.high, price);
+    const updatedLow  = Math.min(lc.low,  price);
+
+    // Mutate the ref so next tick builds on the updated candle
+    lastCandleRef.current = { ...lc, close: price, high: updatedHigh, low: updatedLow };
+
+    try {
+      if (chartTypeRef.current === "Candlestick" || chartTypeRef.current === "Bar") {
+        series.update({
+          time:  lc.time as any,
+          open:  lc.open,
+          high:  updatedHigh,
+          low:   updatedLow,
+          close: price,
+        });
+      } else {
+        series.update({ time: lc.time as any, value: price });
+      }
+    } catch {
+      // Series may have been destroyed during a chart rebuild — safe to ignore
+    }
+  }, [coinPrice]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const toggleInd = (id: string) =>
