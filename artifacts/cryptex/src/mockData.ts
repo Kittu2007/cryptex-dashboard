@@ -101,10 +101,9 @@ export function generateCandles(
                range.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const rand = seededRand(seed);
 
-  const candles = [];
+  const raw: { open: number; high: number; low: number; close: number; value: number }[] = [];
   const now = Math.floor(Date.now() / 1000);
-  // Start from a price that will end up near basePrice
-  let price = basePrice * (0.80 + rand() * 0.15);
+  let price = basePrice * (0.72 + rand() * 0.18);
 
   for (let i = count; i >= 0; i--) {
     const open = price;
@@ -115,14 +114,24 @@ export function generateCandles(
     const high = Math.max(open, close) + rand() * open * wickMult;
     const low  = Math.min(open, close) - rand() * open * wickMult;
     const volume = (rand() * 800 + 200) * (open > 1000 ? 1 : open > 10 ? 5 : 50);
-    candles.push({
-      time: now - i * interval,
-      open, high, low, close,
-      value: volume,
-    });
+    raw.push({ open, high, low, close, value: volume });
     price = close;
   }
-  return candles;
+
+  // Normalize so the final candle's close always equals basePrice,
+  // keeping the shape of the path intact — this ensures switching
+  // timeframes never jumps to a wildly different price level.
+  const lastClose = raw[raw.length - 1].close;
+  const scale = basePrice / lastClose;
+
+  return raw.map((c, i) => ({
+    time: now - (raw.length - 1 - i) * interval,
+    open:  c.open  * scale,
+    high:  c.high  * scale,
+    low:   c.low   * scale,
+    close: c.close * scale,
+    value: c.value,
+  }));
 }
 
 // Compute MA from candles
