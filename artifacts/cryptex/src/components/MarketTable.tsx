@@ -48,7 +48,7 @@ export default function MarketTable() {
   const [sortKey, setSortKey] = useState<SortKey>("marketCap");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const priceRefs = useRef<Record<string, HTMLTableCellElement | null>>({});
-  const { formatPrice, livePrices } = useApp();
+  const { formatPrice, livePrices, currencySymbol } = useApp();
   const { navigateToCoin } = useCoinNav();
 
   useEffect(() => {
@@ -239,10 +239,10 @@ export default function MarketTable() {
                       </div>
                     </td>
                     <td className="hide-tablet" align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-2)", paddingRight: 16, minWidth: 80 }}>
-                      ${formatBillions(liveMktCapB)}
+                      {currencySymbol}{formatBillions(liveMktCapB)}
                     </td>
                     <td className="hide-mobile" align="right" style={{ fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-2)", paddingRight: 16, minWidth: 80 }}>
-                      ${formatBillions(liveVolumeB)}
+                      {currencySymbol}{formatBillions(liveVolumeB)}
                     </td>
                     <td align="right" style={{ minWidth: 72 }}><SignalPill change={liveChange} /></td>
                   </tr>

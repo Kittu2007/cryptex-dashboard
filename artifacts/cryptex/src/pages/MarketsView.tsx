@@ -34,7 +34,7 @@ type SortKey = "price" | "change24h" | "change7d" | "marketCap" | "volume";
 type SortDir = "asc" | "desc";
 
 export default function MarketsView() {
-  const { livePrices, liveMarket, formatPrice } = useApp();
+  const { livePrices, liveMarket, formatPrice, currencySymbol } = useApp();
   const { navigateToCoin } = useCoinNav();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -124,8 +124,8 @@ export default function MarketsView() {
   const otherDom = Math.max(0, 100 - btcDom - ethDom);
 
   const marketSummary = [
-    { label: "Total Market Cap",  value: `$${liveMarket.marketCap.toFixed(2)}T`,   change: "+1.2%", up: true  },
-    { label: "24H Volume",        value: `$${liveMarket.volume24h.toFixed(1)}B`,    change: "+8.4%", up: true  },
+    { label: "Total Market Cap",  value: `${currencySymbol}${liveMarket.marketCap.toFixed(2)}T`,   change: "+1.2%", up: true  },
+    { label: "24H Volume",        value: `${currencySymbol}${liveMarket.volume24h.toFixed(1)}B`,    change: "+8.4%", up: true  },
     { label: "BTC Dominance",     value: `${liveMarket.btcDominance.toFixed(1)}%`,  change: "-0.3%", up: false },
     { label: "Fear & Greed",      value: `${liveMarket.fearGreed}`,                 change: "Greed",  up: liveMarket.fearGreed >= 50 },
   ];
@@ -312,8 +312,8 @@ export default function MarketsView() {
                     const isMainUp  = changeMain >= 0;
                     const is24Up    = change24h >= 0;
                     const is7Up     = change7d  >= 0;
-                    const fmtMktCap = mktCapB >= 1000 ? `$${(mktCapB / 1000).toFixed(2)}T` : `$${mktCapB.toFixed(1)}B`;
-                    const fmtVol    = volumeB >= 1 ? `$${volumeB.toFixed(1)}B` : `$${(volumeB * 1000).toFixed(0)}M`;
+                    const fmtMktCap = mktCapB >= 1000 ? `${currencySymbol}${(mktCapB / 1000).toFixed(2)}T` : `${currencySymbol}${mktCapB.toFixed(1)}B`;
+                    const fmtVol    = volumeB >= 1 ? `${currencySymbol}${volumeB.toFixed(1)}B` : `${currencySymbol}${(volumeB * 1000).toFixed(0)}M`;
                     return (
                       <tr key={coin.id} className="mkt-row market-row"
                         ref={el => { flashRefs.current[coin.symbol] = el; }}
@@ -332,7 +332,7 @@ export default function MarketsView() {
                           </div>
                         </td>
                         <td align="right" style={{ padding: "11px 14px", fontFamily: "var(--font-data)", fontSize: 12, color: "var(--text-1)", fontWeight: 500 }}>
-                          {price < 1 ? `$${price.toFixed(3)}` : `$${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          {formatPrice(price)}
                         </td>
                         <td align="right" style={{ padding: "11px 14px", fontFamily: "var(--font-data)", fontSize: 11, color: isMainUp ? "var(--bull)" : "var(--bear)" }}>
                           {isMainUp ? "+" : ""}{changeMain.toFixed(2)}%

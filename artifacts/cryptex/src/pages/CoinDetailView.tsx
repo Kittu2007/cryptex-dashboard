@@ -127,7 +127,7 @@ function sentLabel(s: number) {
 interface Props { symbol: string; onBack: () => void; }
 
 export default function CoinDetailView({ symbol, onBack }: Props) {
-  const { livePrices, formatPrice } = useApp();
+  const { livePrices, formatPrice, currencySymbol } = useApp();
 
   const headerRef         = useRef<HTMLDivElement>(null);
   const mainRef           = useRef<HTMLDivElement>(null);
@@ -255,7 +255,7 @@ export default function CoinDetailView({ symbol, onBack }: Props) {
   const targetUp  = parseFloat(targetDist) >= 0;
 
   function fmt(b: number) {
-    return b >= 1000 ? `$${(b / 1000).toFixed(2)}T` : b >= 1 ? `$${b.toFixed(1)}B` : `$${(b * 1000).toFixed(0)}M`;
+    return b >= 1000 ? `${currencySymbol}${(b / 1000).toFixed(2)}T` : b >= 1 ? `${currencySymbol}${b.toFixed(1)}B` : `${currencySymbol}${(b * 1000).toFixed(0)}M`;
   }
 
   return (

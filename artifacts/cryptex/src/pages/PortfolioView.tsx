@@ -171,6 +171,7 @@ function AllocationBar({ symbol, pct, value, gainPct, color }: {
   symbol: string; pct: number; value: number; gainPct: number; color: string;
 }) {
   const barRef = useRef<HTMLDivElement>(null);
+  const { formatPrice } = useApp();
   useEffect(() => {
     gsap.from(barRef.current, {
       scaleX: 0, transformOrigin: "left", duration: 1, ease: "expo.out",
@@ -190,7 +191,7 @@ function AllocationBar({ symbol, pct, value, gainPct, color }: {
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontFamily: "var(--font-data)", fontSize: 11, color: "var(--text-1)" }}>
-            ${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            {formatPrice(value)}
           </div>
           <div style={{ fontFamily: "var(--font-data)", fontSize: 9, color: gainPct >= 0 ? "var(--bull)" : "var(--bear)" }}>
             {gainPct >= 0 ? "+" : ""}{gainPct.toFixed(1)}%

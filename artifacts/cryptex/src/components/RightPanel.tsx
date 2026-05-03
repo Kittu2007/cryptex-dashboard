@@ -187,7 +187,7 @@ export default function RightPanel() {
   const portPrev = useRef(0);
   const gainPrev = useRef(0);
 
-  const { formatPrice, liveMarket, livePrices } = useApp();
+  const { formatPrice, liveMarket, livePrices, currencySymbol } = useApp();
 
   useEffect(() => {
     gsap.from(panelRef.current, { x: 20, opacity: 0, duration: 0.6, ease: "expo.out", delay: 0.6 });
@@ -290,9 +290,9 @@ export default function RightPanel() {
             <TrendingUp size={9} /> Live
           </span>
         </div>
-        <AnimatedNumber value={liveMarket.marketCap} suffix="T" decimals={2} />
+        <AnimatedNumber value={liveMarket.marketCap} prefix={currencySymbol} suffix="T" decimals={2} />
         <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>
-          +${(liveMarket.marketCap * 0.037).toFixed(1)}B today
+          +{currencySymbol}{(liveMarket.marketCap * 0.037).toFixed(1)}B today
         </div>
       </div>
 
@@ -304,7 +304,7 @@ export default function RightPanel() {
             <TrendingUp size={9} /> Live
           </span>
         </div>
-        <AnimatedNumber value={liveMarket.volume24h} suffix="B" decimals={1} />
+        <AnimatedNumber value={liveMarket.volume24h} prefix={currencySymbol} suffix="B" decimals={1} />
         <div style={{ fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-2)", marginTop: 2 }}>Across all pairs</div>
       </div>
 
