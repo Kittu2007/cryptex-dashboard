@@ -6,6 +6,7 @@ import { coins } from "../mockData";
 import Sparkline from "./Sparkline";
 import CoinIcon from "./CoinIcon";
 import { useApp } from "../context/AppContext";
+import { useCoinNav } from "../context/CoinNavContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,6 +49,7 @@ export default function MarketTable() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const priceRefs = useRef<Record<string, HTMLTableCellElement | null>>({});
   const { formatPrice, livePrices } = useApp();
+  const { navigateToCoin } = useCoinNav();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 400);
@@ -197,8 +199,9 @@ export default function MarketTable() {
                 return (
                   <tr key={coin.id} className="mkt-row" style={{
                     borderBottom: "1px solid rgba(31,31,46,0.4)",
-                    transition: "background 0.1s"
+                    transition: "background 0.1s", cursor: "pointer"
                   }}
+                    onClick={() => navigateToCoin(coin.symbol)}
                     onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
                     onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >

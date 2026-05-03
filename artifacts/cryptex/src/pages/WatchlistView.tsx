@@ -4,6 +4,7 @@ import { Plus, Trash2, Bell, BellOff, TrendingUp, TrendingDown, Search, Target }
 import { coins } from "../mockData";
 import Sparkline from "../components/Sparkline";
 import { useApp } from "../context/AppContext";
+import { useCoinNav } from "../context/CoinNavContext";
 
 function generateSparkData(base: number, trend: number): number[] {
   const pts = [base];
@@ -27,6 +28,7 @@ export default function WatchlistView() {
   const [search, setSearch]             = useState("");
   const [sortMode, setSortMode]         = useState<"default" | "gainers" | "losers">("default");
 
+  const { navigateToCoin } = useCoinNav();
   const prevPrices = useRef<Record<string, number>>({});
   const cardRefs   = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -248,7 +250,12 @@ export default function WatchlistView() {
               ref={el => { cardRefs.current[coin.id] = el; }}
               style={{
                 background: "var(--bg-surface)", border: "1px solid var(--border)",
-                borderRadius: 8, padding: "18px 20px", transition: "border-color 0.15s"
+                borderRadius: 8, padding: "18px 20px", transition: "border-color 0.15s",
+                cursor: "pointer"
+              }}
+              onClick={e => {
+                if ((e.target as HTMLElement).closest("button")) return;
+                navigateToCoin(coin.symbol);
               }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}

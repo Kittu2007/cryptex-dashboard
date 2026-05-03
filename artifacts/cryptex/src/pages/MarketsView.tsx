@@ -4,6 +4,7 @@ import { Search, ChevronUp, ChevronDown } from "lucide-react";
 import { coins } from "../mockData";
 import Sparkline from "../components/Sparkline";
 import { useApp } from "../context/AppContext";
+import { useCoinNav } from "../context/CoinNavContext";
 
 const categories = ["All", "Layer 1", "DeFi", "Layer 2", "Gaming", "AI", "Stablecoin"];
 const timeFilters = ["1H", "24H", "7D", "30D", "1Y"];
@@ -33,6 +34,7 @@ type SortDir = "asc" | "desc";
 
 export default function MarketsView() {
   const { livePrices, liveMarket, formatPrice } = useApp();
+  const { navigateToCoin } = useCoinNav();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [timeFilter, setTimeFilter] = useState("24H");
@@ -314,7 +316,8 @@ export default function MarketsView() {
                     return (
                       <tr key={coin.id} className="mkt-row market-row"
                         ref={el => { flashRefs.current[coin.symbol] = el; }}
-                        style={{ borderBottom: "1px solid rgba(31,31,46,0.5)" }}>
+                        onClick={() => navigateToCoin(coin.symbol)}
+                        style={{ borderBottom: "1px solid rgba(31,31,46,0.5)", cursor: "pointer" }}>
                         <td style={{ padding: "11px 14px", fontFamily: "var(--font-data)", fontSize: 10, color: "var(--text-3)" }}>{i + 1}</td>
                         <td style={{ padding: "11px 14px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
