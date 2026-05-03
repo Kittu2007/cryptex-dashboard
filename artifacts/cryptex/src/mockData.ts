@@ -134,11 +134,96 @@ export function generateCandles(
   }));
 }
 
-// Compute MA from candles
+// Compute Simple MA from candles
 export function computeMA(candles: { close: number }[], period: number): number {
   const slice = candles.slice(-period);
   if (slice.length < period) return 0;
   return slice.reduce((s, c) => s + c.close, 0) / period;
+}
+
+// Compute EMA (exponential moving average) over a price array
+function computeEMA(prices: number[], period: number): number {
+  if (prices.length < period) return prices[prices.length - 1] ?? 0;
+  const k = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((s, p) => s + p, 0) / period;
+  for (let i = period; i < prices.length; i++) {
+    ema = prices[i] * k + ema * (1 - k);
+  }
+  return ema;
+}
+
+export interface TechIndicators {
+  rsi: number;       // 0–100
+  macd: number;      // macd line value
+  macdSignal: number;
+  macdHist: number;
+  bbUpper: number;
+  bbMid: number;
+  bbLower: number;
+  atr: number;
+  volume24h: number; // sum of last N bars' volume
+}
+
+export function computeIndicators(
+  candles: { open: number; high: number; low: number; close: number; value: number }[]
+): TechIndicators {
+  const closes = candles.map(c => c.close);
+  const n = closes.length;
+
+  // ── RSI(14) ──
+  let gains = 0, losses = 0;
+  const rsiPeriod = 14;
+  for (let i = n - rsiPeriod; i < n; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff > 0) gains += diff; else losses += Math.abs(diff);
+  }
+  const avgGain = gains / rsiPeriod;
+  const avgLoss = losses / rsiPeriod;
+  const rs  = avgLoss === 0 ? 100 : avgGain / avgLoss;
+  const rsi = parseFloat((100 - 100 / (1 + rs)).toFixed(1));
+
+  // ── MACD(12,26,9) ──
+  const ema12 = computeEMA(closes, 12);
+  const ema26 = computeEMA(closes, 26);
+  const macd  = parseFloat((ema12 - ema26).toFixed(2));
+
+  // Build a signal line from the last 26 macd values
+  const macdLine: number[] = [];
+  for (let i = 26; i <= n; i++) {
+    const e12 = computeEMA(closes.slice(0, i), 12);
+    const e26 = computeEMA(closes.slice(0, i), 26);
+    macdLine.push(e12 - e26);
+  }
+  const macdSignal = parseFloat(computeEMA(macdLine, 9).toFixed(2));
+  const macdHist   = parseFloat((macd - macdSignal).toFixed(2));
+
+  // ── Bollinger Bands(20, 2) ──
+  const bbPeriod = 20;
+  const bbSlice  = closes.slice(-bbPeriod);
+  const bbMid    = bbSlice.reduce((s, p) => s + p, 0) / bbPeriod;
+  const variance = bbSlice.reduce((s, p) => s + Math.pow(p - bbMid, 2), 0) / bbPeriod;
+  const bbStd    = Math.sqrt(variance);
+  const bbUpper  = parseFloat((bbMid + 2 * bbStd).toFixed(2));
+  const bbLower  = parseFloat((bbMid - 2 * bbStd).toFixed(2));
+
+  // ── ATR(14) ──
+  const atrPeriod = 14;
+  let atrSum = 0;
+  for (let i = n - atrPeriod; i < n; i++) {
+    const prev = candles[i - 1]?.close ?? candles[i].open;
+    const tr   = Math.max(
+      candles[i].high - candles[i].low,
+      Math.abs(candles[i].high - prev),
+      Math.abs(candles[i].low  - prev),
+    );
+    atrSum += tr;
+  }
+  const atr = parseFloat((atrSum / atrPeriod).toFixed(2));
+
+  // ── Volume (sum of all bars) ──
+  const volume24h = candles.reduce((s, c) => s + c.value, 0);
+
+  return { rsi, macd, macdSignal, macdHist, bbUpper, bbMid: parseFloat(bbMid.toFixed(2)), bbLower, atr, volume24h };
 }
 
 export const coinTabs = ["BTC", "ETH", "SOL", "BNB", "MATIC"];

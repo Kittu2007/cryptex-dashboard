@@ -6,8 +6,8 @@ import {
 } from "lightweight-charts";
 import { BarChart2, TrendingUp, AlignLeft, AreaChart, Activity } from "lucide-react";
 import {
-  generateCandles, computeMA, coinTabs, timeRanges,
-  COIN_BASE_PRICES, COIN_META,
+  generateCandles, computeMA, computeIndicators, coinTabs, timeRanges,
+  COIN_BASE_PRICES, COIN_META, TechIndicators,
 } from "../mockData";
 import { useApp } from "../context/AppContext";
 
@@ -33,8 +33,9 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
   const [activeRange,     setActiveRange]     = useState("1D");
   const [activeChartType, setActiveChartType] = useState<ChartType>("Candlestick");
   const [maValues,        setMaValues]        = useState({ ma7: 0, ma25: 0, ma99: 0 });
+  const [techInd,         setTechInd]         = useState<TechIndicators | null>(null);
 
-  const { settings, formatPrice, livePrices, activePair, setActivePair } = useApp();
+  const { settings, formatPrice, livePrices, liveMarket, activePair, setActivePair } = useApp();
 
   // Coin price + change come directly from shared live state
   const coinLive   = livePrices[activePair];
@@ -90,11 +91,12 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
 
     const candles = generateCandles(activePair, activeRange);
 
-    // Compute MAs and update display
+    // Compute MAs + all technical indicators from candle data
     const ma7  = computeMA(candles, 7);
     const ma25 = computeMA(candles, 25);
     const ma99 = computeMA(candles, 99);
     setMaValues({ ma7, ma25, ma99 });
+    setTechInd(computeIndicators(candles));
 
     // Add price series based on chart type
     if (activeChartType === "Candlestick") {
@@ -308,29 +310,63 @@ export default function ChartPanel({ livePrice, priceChange }: ChartPanelProps) 
       }} />
 
       {/* ── Indicator strip ── */}
-      <div style={{
-        display: "flex", gap: 20, flexWrap: "wrap",
-        padding: "7px 20px",
-        borderTop: "1px solid var(--border)",
-        flexShrink: 0,
-      }}>
-        {[
-          { label: "RSI(14)",    value: "62.4",      color: "var(--accent)" },
-          { label: "MACD",       value: "+124.8",    color: "var(--bull)" },
-          { label: "BBands",     value: fmtMA(maValues.ma25 * 1.02), color: "var(--text-1)" },
-          { label: "ATR(14)",    value: (coinPrice * 0.018).toFixed(coinPrice < 10 ? 4 : 0), color: "var(--text-1)" },
-          { label: "Fear/Greed", value: "72 Greed",  color: "#EAB308" },
-          { label: "Vol",        value: activeRange === "1D" ? "38.2B" : activeRange === "1W" ? "267B" : "12.4B", color: "var(--text-2)" },
-        ].map((ind, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <span style={{
-              fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
-              letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)"
-            }}>{ind.label}</span>
-            <span style={{ fontFamily: "var(--font-data)", fontSize: 11, color: ind.color }}>{ind.value}</span>
+      {(() => {
+        const fg    = liveMarket.fearGreed;
+        const fgLabel = fg >= 75 ? "Extreme Greed" : fg >= 55 ? "Greed" : fg >= 45 ? "Neutral" : fg >= 25 ? "Fear" : "Extreme Fear";
+        const fgColor = fg >= 55 ? "#EAB308" : fg >= 45 ? "var(--text-2)" : "var(--bear)";
+
+        const rsi   = techInd?.rsi ?? 0;
+        const rsiColor = rsi >= 70 ? "var(--bear)" : rsi <= 30 ? "var(--bull)" : "var(--accent)";
+
+        const macd     = techInd?.macd     ?? 0;
+        const macdHist = techInd?.macdHist ?? 0;
+        const macdColor = macd >= 0 ? "var(--bull)" : "var(--bear)";
+
+        const bbUpper = techInd?.bbUpper ?? maValues.ma25 * 1.02;
+        const atr     = techInd?.atr     ?? 0;
+
+        // Format volume: sum of bars scaled to billions
+        const rawVol = techInd?.volume24h ?? 0;
+        const volB   = rawVol / 1_000_000;
+        const volStr = volB >= 1000
+          ? `${(volB / 1000).toFixed(1)}T`
+          : volB >= 1
+          ? `${volB.toFixed(1)}B`
+          : `${(rawVol / 1000).toFixed(0)}M`;
+
+        const strip = [
+          { label: "RSI(14)",    value: rsi.toFixed(1),                                          color: rsiColor },
+          { label: "MACD",       value: `${macd >= 0 ? "+" : ""}${macd.toFixed(2)}`,             color: macdColor },
+          { label: "MACD Hist",  value: `${macdHist >= 0 ? "+" : ""}${macdHist.toFixed(2)}`,     color: macdHist >= 0 ? "var(--bull)" : "var(--bear)" },
+          { label: "BB Upper",   value: fmtMA(bbUpper),                                           color: "var(--text-1)" },
+          { label: "ATR(14)",    value: fmtMA(atr),                                               color: "var(--text-1)" },
+          { label: "Fear/Greed", value: `${fg} ${fgLabel}`,                                       color: fgColor },
+          { label: "Vol",        value: volStr,                                                    color: "var(--text-2)" },
+        ];
+
+        return (
+          <div style={{
+            display: "flex", gap: 18, flexWrap: "nowrap", overflowX: "auto",
+            padding: "7px 20px",
+            borderTop: "1px solid var(--border)",
+            flexShrink: 0,
+          }}>
+            {strip.map((ind, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
+                <span style={{
+                  fontFamily: "var(--font-ui)", fontSize: 8, fontWeight: 600,
+                  letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)",
+                  whiteSpace: "nowrap",
+                }}>{ind.label}</span>
+                <span style={{
+                  fontFamily: "var(--font-data)", fontSize: 11, color: ind.color,
+                  whiteSpace: "nowrap",
+                }}>{ind.value}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })()}
     </div>
   );
 }
